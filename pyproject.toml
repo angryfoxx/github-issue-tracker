@@ -15,12 +15,30 @@ celery = "^5.3.6"
 django-filter = "^24.2"
 envanter = "^1.2.1"
 redis = "^5.0.3"
+requests = "^2.31.0"
+django-extensions = "^3.2.3"
+ipython = "^8.23.0"
+pre-commit = "^3.7.0"
+mypy = "^1.9.0"
+django-stubs = "^4.2.7"
 
 [tool.ruff]
 fix = true
 show-fixes = true
 target-version = "py312"
 line-length = 120
+
+[tool.mypy]
+plugins = [
+    "mypy_django_plugin.main",
+    "mypy_drf_plugin.main",
+]
+strict = true
+ignore_missing_imports = true
+allow_subclassing_any = true
+
+[tool.django-stubs]
+django_settings_module = "gissues.settings"
 
 [build-system]
 requires = ["poetry-core"]
