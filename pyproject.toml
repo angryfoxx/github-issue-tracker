@@ -1,0 +1,26 @@
+[tool.poetry]
+name = "github-issue-tracker"
+version = "0.1.0"
+description = ""
+authors = ["Ömer Faruk Korkmaz <omarfarukkorkmazz@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+Django = "^5.0.4"
+djangorestframework = "^3.15.1"
+psycopg2 = "^2.9.9"
+celery = "^5.3.6"
+django-filter = "^24.2"
+envanter = "^1.2.1"
+
+[tool.ruff]
+fix = true
+show-fixes = true
+target-version = "py312"
+line-length = 120
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

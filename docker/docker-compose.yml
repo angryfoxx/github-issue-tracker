@@ -1,0 +1,68 @@
+version: '3.7'
+
+services:
+  db:
+    container_name: gissues-postgres
+    image: postgres:15
+    user: postgres
+    ports:
+      - "5432:5432"
+    env_file: ../.env
+    volumes:
+      - ./../volume/db:/var/lib/postgresql/data
+  db-eventstream:
+    container_name: gissues-postgres-eventstream
+    image: postgres:15
+    user: postgres
+    env_file: ../.env
+  web:
+    container_name: gissues-web
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    env_file: ../.env
+    environment:
+      DJANGO_CONTEXT: web
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ..:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+  redis:
+    container_name: gissues-redis
+    image: redis:6.2.6-alpine
+    user: redis
+#  celery-worker:
+#    container_name: gissues-celery-worker
+#    build:
+#      context: ..
+#      dockerfile: docker/Dockerfile
+#    env_file: ../.env
+#    environment:
+#      DJANGO_CONTEXT: celery
+#
+#    command: celery -A gissues worker -l info
+#    volumes:
+#      - ..:/code
+#    depends_on:
+#      - redis
+#      - db
+#      - web
+#  celery-beat:
+#    container_name: gissues-celery-beat
+#    build:
+#      context: ..
+#      dockerfile: docker/Dockerfile
+#    env_file: ../.env
+#    environment:
+#      DJANGO_CONTEXT: celery
+#    command: celery -A gissues beat -l info
+#    volumes:
+#      - ..:/code
+#    depends_on:
+#      - redis
+#      - db
+#      - web
+#      - celery-worker
