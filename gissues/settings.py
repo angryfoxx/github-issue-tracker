@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "gissues",
     "gissues.extensions",
     "gissues.extensions.rest_framework",
+    "gissues.extensions.github_client",
 ]
 
 MIDDLEWARE = [
@@ -146,3 +147,20 @@ STATIC_URL = "/static/"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 SHELL_PLUS = "ipython"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
+
+GITHUB_CLIENT_URL = env.str("GITHUB_CLIENT_URL", "https://api.github.com").rstrip("/")
+GITHUB_CLIENT_AUTH_TOKEN = env.str("GITHUB_CLIENT_AUTH_TOKEN")
