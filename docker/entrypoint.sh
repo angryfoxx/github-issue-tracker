@@ -5,7 +5,7 @@ while ! nc -z "$DATABASE_HOST" "$DATABASE_PORT"; do
 done
 
 if [ "${DJANGO_CONTEXT}" = "celery" ]; then
-  while ! nc -z "$REDIS_HOST" "$REDIS_PORT"; do
+  while ! nc -z redis 6379; do
     sleep 0.1
   done
 fi

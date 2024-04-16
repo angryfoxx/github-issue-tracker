@@ -34,35 +34,34 @@ services:
     container_name: gissues-redis
     image: redis:6.2.6-alpine
     user: redis
-#  celery-worker:
-#    container_name: gissues-celery-worker
-#    build:
-#      context: ..
-#      dockerfile: docker/Dockerfile
-#    env_file: ../.env
-#    environment:
-#      DJANGO_CONTEXT: celery
-#
-#    command: celery -A gissues worker -l info
-#    volumes:
-#      - ..:/code
-#    depends_on:
-#      - redis
-#      - db
-#      - web
-#  celery-beat:
-#    container_name: gissues-celery-beat
-#    build:
-#      context: ..
-#      dockerfile: docker/Dockerfile
-#    env_file: ../.env
-#    environment:
-#      DJANGO_CONTEXT: celery
-#    command: celery -A gissues beat -l info
-#    volumes:
-#      - ..:/code
-#    depends_on:
-#      - redis
-#      - db
-#      - web
-#      - celery-worker
+  celery-worker:
+    container_name: gissues-celery-worker
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    env_file: ../.env
+    environment:
+      DJANGO_CONTEXT: celery
+    command: celery -A gissues worker -l info
+    volumes:
+      - ..:/code
+    depends_on:
+      - redis
+      - db
+      - web
+  celery-beat:
+    container_name: gissues-celery-beat
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    env_file: ../.env
+    environment:
+      DJANGO_CONTEXT: celery
+    command: celery -A gissues beat -l info
+    volumes:
+      - ..:/code
+    depends_on:
+      - redis
+      - db
+      - web
+      - celery-worker
