@@ -26,6 +26,8 @@ pytest-mock = "^3.14.0"
 pytest-cov = "^5.0.0"
 django-simple-history = "^3.5.0"
 pytest-factoryboy = "^2.7.0"
+black = "^24.4.0"
+isort = "^5.13.2"
 
 [tool.ruff]
 fix = true
@@ -52,6 +54,23 @@ addopts = ["--cov=gissues", "--cov-report=term-missing", "--cov-report=html", "-
 
 [tool.coverage.report]
 omit = ["*migrations*", "*tests*", "asgi.py", "wsgi.py", "manage.py", "*urls*"]
+
+[tool.black]
+line-length = 120
+exclude = '''
+/(
+  | migrations
+)/
+'''
+
+[tool.isort]
+profile = "black"
+known_django = "django"
+known_rest_framework = "rest_framework"
+sections = "FUTURE,STDLIB,DJANGO,REST_FRAMEWORK,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+combine_as_imports = true
+line_length = 120
+skip_glob = ["**/migrations"]
 
 [build-system]
 requires = ["poetry-core"]
