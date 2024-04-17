@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "django_extensions",
+    "simple_history",
     # Local apps
     "gissues",
     "gissues.extensions",
@@ -51,6 +52,8 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    # Third party middleware
+    "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 ROOT_URLCONF = "gissues.urls"
