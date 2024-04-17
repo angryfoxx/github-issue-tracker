@@ -31,4 +31,7 @@ django:
 compile-requirements:
 	poetry export -f requirements.txt --output requirements.txt --without-hashes
 
-.PHONY: build up down logs restart stop start clean compile-requirements django
+test:
+	$(COMPOSE_CMD) exec web pytest
+
+.PHONY: build up down logs restart stop start clean compile-requirements django test

@@ -21,7 +21,6 @@ ipython = "^8.23.0"
 pre-commit = "^3.7.0"
 mypy = "^1.9.0"
 django-stubs = "^4.2.7"
-pytest = "^8.1.1"
 pytest-django = "^4.8.0"
 
 [tool.ruff]
@@ -43,7 +42,7 @@ allow_subclassing_any = true
 django_settings_module = "gissues.settings"
 
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "gissues.test-settings"
+DJANGO_SETTINGS_MODULE = "gissues.test.settings"
 python_files = ["test_*.py", "*_test.py"]
 
 [build-system]
