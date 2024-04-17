@@ -16,3 +16,6 @@ DATABASES = {
 }
 INSTALLED_APPS.remove("django_extensions")  # noqa: F405
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
+
+GITHUB_CLIENT_URL = "https://www.test.com"
+GITHUB_CLIENT_AUTH_TOKEN = "test_token"

@@ -40,10 +40,6 @@ class GitHubClient:
     client_url = settings.GITHUB_CLIENT_URL
     client_token = settings.GITHUB_CLIENT_AUTH_TOKEN
 
-    def __init__(self):
-        self._issues = GitHubIssues(self)
-        self._repositories = GitHubRepositories(self)
-
     @property
     def session(self):
         session = requests.Session()
@@ -139,12 +135,12 @@ class GitHubClient:
     @property
     def issues(self) -> "GitHubIssues":
         """Get the GitHub issues client."""
-        return self._issues
+        return GitHubIssues(self)
 
     @property
     def repositories(self) -> "GitHubRepositories":
         """Get the GitHub repositories client."""
-        return self._repositories
+        return GitHubRepositories(self)
 
 
 class GitHubIssues:
@@ -190,7 +186,7 @@ class GitHubIssues:
 
 class GitHubRepositories:
     _path_list = "/users/%(username)s/repos"
-    _path_detail = "/repos/%(owner)s/{repo}"
+    _path_detail = "/repos/%(owner)s/%(repo)s"
 
     def __init__(self, base_client: GitHubClient):
         self.base_client = base_client
