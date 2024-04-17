@@ -8,6 +8,7 @@ from gissues.tests.factories import (
     IssueCommentBodyFactory,
     IssueFactory,
     RepositoryFactory,
+    UserFactory,
 )
 
 
@@ -34,3 +35,4 @@ register(RepositoryFactory)
 register(IssueFactory)
 register(CommentsFactory)
 register(IssueCommentBodyFactory)
+register(UserFactory)

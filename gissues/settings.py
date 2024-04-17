@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # Local apps
     "gissues",
     "gissues.extensions",
+    "gissues.extensions.auth",
     "gissues.extensions.github",
     "gissues.extensions.github_client",
     "gissues.extensions.rest_framework",
@@ -168,3 +169,5 @@ LOGGING = {
 
 GITHUB_CLIENT_URL = env.str("GITHUB_CLIENT_URL", "https://api.github.com").rstrip("/")
 GITHUB_CLIENT_AUTH_TOKEN = env.str("GITHUB_CLIENT_AUTH_TOKEN", "")
+
+AUTH_USER_MODEL = "account.User"

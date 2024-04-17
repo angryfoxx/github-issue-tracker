@@ -2,6 +2,7 @@ import datetime
 
 import factory
 
+from gissues.extensions.auth.models import User
 from gissues.extensions.github.models import (
     Comments,
     Issue,
@@ -61,3 +62,20 @@ class IssueCommentBodyFactory(factory.django.DjangoModelFactory):
     comment = factory.SubFactory(CommentsFactory)
     created_at = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
     updated_at = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
+
+
+class UserFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = User
+        skip_postgeneration_save = True
+
+    username = factory.Sequence(lambda n: f"user-{n}")
+    email = factory.Sequence(lambda n: f"user-email{n}@gmail.com")
+    password = factory.PostGenerationMethodCall("set_password", "password")
+
+    is_staff = factory.Faker("boolean")
+    is_active = factory.Faker("boolean")
+    is_superuser = factory.Faker("boolean")
+
+    last_login = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
+    date_joined = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
