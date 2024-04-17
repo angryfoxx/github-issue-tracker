@@ -20,12 +20,3 @@ def api_client():
     from rest_framework.test import APIClient
 
     return APIClient()
-
-
-@pytest.fixture
-def mocked_celery():
-    from celery import Celery
-
-    celery_mock = Mock(spec=Celery)
-    celery_mock.config_from_object.return_value = None
-    return celery_mock

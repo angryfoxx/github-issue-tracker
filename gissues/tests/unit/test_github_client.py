@@ -77,25 +77,31 @@ def test_ServiceUnavailable_exception():
     )
 
 
-def test_GitHubClient_client_url():
-    client = GitHubClient()
-    assert client.client_url == "https://www.test.com"
-
-
-def test_GitHubClient_client_token():
-    client = GitHubClient()
-    assert client.client_token == "test_token"
-
-
 @patch("gissues.extensions.github_client.client.requests.Session")
-def test_GitHubClient_session(mock_session):
+def test_GitHubClient_session_without_token(mock_session):
     mock_session.return_value.headers = {}
 
     client = GitHubClient()
     session = client.session
 
     assert session.headers == {
-        "Authorization": "Bearer test_token",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+
+    mock_session.assert_called_once()
+
+
+@patch("gissues.extensions.github_client.client.requests.Session")
+def test_GitHubClient_session_with_token(mock_session):
+    mock_session.return_value.headers = {}
+
+    client = GitHubClient()
+    client.client_token = "secret_token"
+    session = client.session
+
+    assert session.headers == {
+        "Authorization": "Bearer secret_token",
         "Accept": "application/vnd.github+json",
         "X-GitHub-Api-Version": "2022-11-28",
     }
@@ -242,7 +248,7 @@ def test_GitHubIssues_list(mocked_github_client):
     assert response.content == {"dummy": "data"}
     assert response.is_ok is True
 
-    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner/repo/issues")
+    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner/repo/issues?state=all")
 
 
 def test_GitHubIssues_detail(mocked_github_client):

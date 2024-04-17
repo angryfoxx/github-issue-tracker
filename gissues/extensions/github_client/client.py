@@ -45,11 +45,14 @@ class GitHubClient:
         session = requests.Session()
         session.headers.update(
             {
-                "Authorization": f"Bearer {self.client_token}",
                 "Accept": "application/vnd.github+json",
                 "X-GitHub-Api-Version": "2022-11-28",
             }
         )
+
+        if self.client_token:
+            session.headers.update({"Authorization": f"Bearer {self.client_token}"})
+
         return session
 
     @staticmethod
@@ -144,7 +147,7 @@ class GitHubClient:
 
 
 class GitHubIssues:
-    _path_list = "/repos/%(owner)s/%(repo)s/issues"
+    _path_list = "/repos/%(owner)s/%(repo)s/issues?state=all"
     _path_detail = "/repos/%(owner)s/%(repo)s/issues/%(issue_number)s"
 
     def __init__(self, base_client: GitHubClient):
