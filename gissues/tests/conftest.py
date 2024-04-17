@@ -1,6 +1,14 @@
 from unittest.mock import Mock
 
 import pytest
+from pytest_factoryboy import register
+
+from gissues.tests.factories import (
+    CommentsFactory,
+    IssueCommentBodyFactory,
+    IssueFactory,
+    RepositoryFactory,
+)
 
 
 @pytest.fixture
@@ -20,3 +28,9 @@ def api_client():
     from rest_framework.test import APIClient
 
     return APIClient()
+
+
+register(RepositoryFactory)
+register(IssueFactory)
+register(CommentsFactory)
+register(IssueCommentBodyFactory)

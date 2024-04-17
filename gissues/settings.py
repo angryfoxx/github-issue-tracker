@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     # Local apps
     "gissues",
     "gissues.extensions",
+    "gissues.extensions.github",
     "gissues.extensions.github_client",
     "gissues.extensions.rest_framework",
 ]
