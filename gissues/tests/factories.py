@@ -2,13 +2,8 @@ import datetime
 
 import factory
 
-from gissues.extensions.auth.models import User
-from gissues.extensions.github.models import (
-    Comments,
-    Issue,
-    IssueCommentBody,
-    Repository,
-)
+from gissues.extensions.auth.models import User, UserRepositoryFollow
+from gissues.extensions.github.models import Comments, Issue, IssueCommentBody, Repository
 
 
 class RepositoryFactory(factory.django.DjangoModelFactory):
@@ -79,3 +74,11 @@ class UserFactory(factory.django.DjangoModelFactory):
 
     last_login = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
     date_joined = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
+
+
+class UserRepositoryFollowFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = UserRepositoryFollow
+
+    user = factory.SubFactory(UserFactory)
+    repository = factory.SubFactory(RepositoryFactory)

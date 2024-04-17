@@ -34,6 +34,7 @@ fix = true
 show-fixes = true
 target-version = "py312"
 line-length = 120
+exclude = ["migrations"]
 
 [tool.mypy]
 plugins = [

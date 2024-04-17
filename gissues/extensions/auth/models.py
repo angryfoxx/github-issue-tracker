@@ -27,3 +27,18 @@ class User(AbstractUser):
 
     def __str__(self) -> str:
         return self.username
+
+
+class UserRepositoryFollow(models.Model):
+    user = models.ForeignKey(User, related_name="repositories_followed", on_delete=models.CASCADE)
+    repository = models.ForeignKey("github.Repository", related_name="followers", on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = "User repository follow"
+        verbose_name_plural = "User repository follows"
+        constraints = [
+            models.UniqueConstraint(fields=["user", "repository"], name="unique_user_repository_follow"),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.user} -> {self.repository}"
