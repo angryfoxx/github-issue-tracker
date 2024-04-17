@@ -55,8 +55,6 @@ class IssueCommentBodyFactory(factory.django.DjangoModelFactory):
     body = factory.Faker("sentence")
     issue = factory.SubFactory(IssueFactory)
     comment = factory.SubFactory(CommentsFactory)
-    created_at = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
-    updated_at = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
 
 
 class UserFactory(factory.django.DjangoModelFactory):

@@ -1,4 +1,5 @@
 from django.db import models
+
 from simple_history.models import HistoricalRecords
 
 
@@ -6,9 +7,6 @@ class IssueCommentBody(models.Model):
     body = models.TextField(max_length=65536)
     issue = models.ForeignKey("Issue", related_name="body", on_delete=models.CASCADE)
     comment = models.OneToOneField("Comments", related_name="body", on_delete=models.CASCADE, null=True)
-
-    created_at = models.DateTimeField()
-    updated_at = models.DateTimeField()
 
     history = HistoricalRecords()
 
