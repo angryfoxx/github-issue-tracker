@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "django_filters",
     "simple_history",
+    "drf_spectacular",
     # Local apps
     "gissues",
     "gissues.extensions",
@@ -171,6 +172,12 @@ GITHUB_CLIENT_AUTH_TOKEN = env.str("GITHUB_CLIENT_AUTH_TOKEN", "")
 
 AUTH_USER_MODEL = "account.User"
 
+DEFAULT_RENDERER_CLASSES = ["rest_framework.renderers.JSONRenderer"]
+DEFAULT_AUTHENTICATION_CLASSES = [
+    "rest_framework.authentication.SessionAuthentication",
+]
+URL_FORMAT_OVERRIDE = None
+
 IS_LOCAL_ENV = DEBUG and SERVER_TYPE == "local"
 if IS_LOCAL_ENV:
     INSTALLED_APPS.extend(
@@ -185,3 +192,33 @@ if IS_LOCAL_ENV:
     DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda _: env.bool("IS_DEBUG_TOOLBAR_ENABLED", False)}
 
     SHELL_PLUS = "ipython"
+
+    DEFAULT_RENDERER_CLASSES = [
+        "rest_framework.renderers.JSONRenderer",
+        "rest_framework.renderers.BrowsableAPIRenderer",
+    ]
+    DEFAULT_AUTHENTICATION_CLASSES = [
+        "rest_framework.authentication.BasicAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
+    ]
+    URL_FORMAT_OVERRIDE = "format"
+
+
+REST_FRAMEWORK = {
+    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",
+    "DEFAULT_AUTHENTICATION_CLASSES": DEFAULT_AUTHENTICATION_CLASSES,
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_RENDERER_CLASSES": DEFAULT_RENDERER_CLASSES,
+    "URL_FORMAT_OVERRIDE": URL_FORMAT_OVERRIDE,
+}
+
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Gissues API",
+    "DESCRIPTION": "API to follow Issues, Repositories on Github",
+    "EXTERNAL_DOCS": {
+        "description": "Github API",
+        "url": "https://docs.github.com/en/rest",
+    },
+    "SCHEMA_PATH_PREFIX": "/api",
+}

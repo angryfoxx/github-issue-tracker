@@ -2,11 +2,11 @@ from django.db.models import OuterRef, Subquery
 
 from rest_framework.generics import get_object_or_404
 
+from gissues.extensions.github.api.serializers import CommentsSerializer, IssueSerializer, RepositorySerializer
 from gissues.extensions.github.models import Comments, Issue, IssueCommentBody, Repository
-from gissues.extensions.github.serializers import CommentsSerializer, IssueSerializer, RepositorySerializer
 from gissues.extensions.github.transformers import transform_comments, transform_issue, transform_repository
+from gissues.extensions.github_client.api.views import GitHubClientViewSet
 from gissues.extensions.github_client.client import github_client
-from gissues.extensions.github_client.views import GitHubClientViewSet
 
 
 class RepositoryViewSet(GitHubClientViewSet):

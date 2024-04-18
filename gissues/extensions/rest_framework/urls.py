@@ -6,7 +6,9 @@ from django.urls import include, path
 
 from rest_framework.routers import DefaultRouter
 
-from gissues.extensions.rest_framework.views import MetaViewSet
+from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+
+from gissues.extensions.rest_framework.api.views import MetaViewSet
 
 logger = logging.getLogger(__name__)
 
@@ -36,5 +38,23 @@ for extension in extensions:
             module_name,
         )
 
-
-urlpatterns = [path("", include(router.urls + nested_urls))]
+urlpatterns = [
+    path("", include(router.urls + nested_urls)),
+    path(
+        "schema/",
+        SpectacularAPIView.as_view(),
+        name="schema",
+    ),
+    path(
+        "schema/redoc/",
+        SpectacularRedocView.as_view(
+            url_name="schema",
+        ),
+        name="redoc",
+    ),
+    path(
+        "schema/swagger-ui/",
+        SpectacularSwaggerView.as_view(),
+        name="swagger-ui",
+    ),
+]

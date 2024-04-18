@@ -4,8 +4,8 @@ from rest_framework import serializers
 
 import pytest
 
+from gissues.extensions.github_client.api.views import GitHubClientViewSet
 from gissues.extensions.github_client.client import GitHubResponse
-from gissues.extensions.github_client.views import GitHubClientViewSet
 
 
 class DummySerializer(serializers.Serializer):

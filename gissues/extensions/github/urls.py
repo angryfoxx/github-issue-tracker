@@ -2,7 +2,7 @@ from rest_framework.routers import DefaultRouter
 
 from rest_framework_nested.routers import NestedSimpleRouter
 
-from gissues.extensions.github.views import CommentsViewSet, IssueViewSet, RepositoryViewSet
+from gissues.extensions.github.api.views import CommentsViewSet, IssueViewSet, RepositoryViewSet
 
 router = DefaultRouter()
 
