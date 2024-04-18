@@ -65,3 +65,18 @@ services:
       - db
       - web
       - celery-worker
+  celery-flower:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    env_file: ../.env
+    environment:
+      DJANGO_CONTEXT: celery
+    command: celery -A gissues flower
+    volumes:
+      - ..:/code
+    ports:
+      - "5555:5555"
+    depends_on:
+      - celery-worker
+      - redis
