@@ -64,6 +64,7 @@ def test_transform_issue(mock_get_object_or_404, repository_factory):
     transformed_issue = transform_issue(
         issue,
         repository.name,
+        repository.owner_name,
     )
     assert transformed_issue.title == issue["title"]
     assert transformed_issue.number == issue["number"]
@@ -77,7 +78,7 @@ def test_transform_issue(mock_get_object_or_404, repository_factory):
     assert transformed_issue.created_at == issue["created_at"]
     assert transformed_issue.updated_at == issue["updated_at"]
 
-    mock_get_object_or_404.assert_called_once_with(Repository, name=repository.name)
+    mock_get_object_or_404.assert_called_once_with(Repository, name=repository.name, owner_name=repository.owner_name)
 
 
 @patch("gissues.extensions.github.transformers.get_object_or_404")
@@ -108,7 +109,12 @@ def test_transform_comments(mock_get_object_or_404, issue_factory):
 @pytest.mark.parametrize(
     "func, model, func_args, get_object_or_404_kwargs",
     [
-        (transform_issue, Repository, {"issue": {}, "repository_name": "gissues"}, {"name": "gissues"}),
+        (
+            transform_issue,
+            Repository,
+            {"issue": {}, "repository_name": "gissues", "owner_name": "gissues"},
+            {"name": "gissues", "owner_name": "gissues"},
+        ),
         (transform_comments, Issue, {"comment": {}, "issue_number": 1}, {"number": 1}),
     ],
 )

@@ -46,7 +46,9 @@ class RepositoryViewSet(GitHubClientViewSet):
     def follow(self, request: Request, repository_owner: str, repository_name: str) -> Response:
         request_user = request.user
 
-        if UserRepositoryFollow.objects.filter(user=request_user, repository__name=repository_name).exists():
+        if UserRepositoryFollow.objects.filter(
+            user=request_user, repository__name=repository_name, repository__owner_name=repository_owner
+        ).exists():
             return Response(status=status.HTTP_200_OK)
 
         UserRepositoryFollow.objects.create(user=request.user, repository=self.get_object())
@@ -54,7 +56,9 @@ class RepositoryViewSet(GitHubClientViewSet):
 
     @action(detail=True, methods=["POST"], permission_classes=[permissions.IsAuthenticated])
     def unfollow(self, request: Request, repository_owner: str, repository_name: str) -> Response:
-        UserRepositoryFollow.objects.filter(user=request.user, repository__name=repository_name).delete()
+        UserRepositoryFollow.objects.filter(
+            user=request.user, repository__name=repository_name, repository__owner_name=repository_owner
+        ).delete()
         return Response(status=status.HTTP_200_OK)
 
 
@@ -67,7 +71,9 @@ class IssueViewSet(GitHubClientViewSet):
 
     def get_queryset(self) -> QuerySet[Issue]:
         qs = super().get_queryset()
-        repository = get_object_or_404(Repository, name=self.kwargs["repository_repository_name"])
+        repository = get_object_or_404(
+            Repository, name=self.kwargs["repository_repository_name"], owner_name=self.kwargs["repository_owner"]
+        )
 
         qs = qs.annotate(body_text=Subquery(IssueCommentBody.objects.filter(issue=OuterRef("pk")).values("body")[:1]))
 
@@ -87,7 +93,9 @@ class IssueViewSet(GitHubClientViewSet):
             issue_number=issue_number,
         )
 
-        transformed_data = transform_issue(obj, self.kwargs["repository_repository_name"]).dict()
+        transformed_data = transform_issue(
+            obj, self.kwargs["repository_repository_name"], self.kwargs["repository_owner"]
+        ).dict()
         body_text = transformed_data.pop("body", None)
 
         issue = Issue.objects.create(**transformed_data)

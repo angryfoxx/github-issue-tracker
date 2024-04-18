@@ -27,18 +27,19 @@ def transform_repository(repository: dict[str, Any]) -> RepositoryDataclass:
     )
 
 
-def transform_issue(issue: dict[str, Any], repository_name: str) -> IssueDataclass:
+def transform_issue(issue: dict[str, Any], repository_name: str, owner_name: str) -> IssueDataclass:
     """Transforms a GitHub issue to a dictionary with the required fields.
 
     Args:
         issue (dict[str, Any]): The GitHub issue to transform.
         repository_name (str): The repository name where the issue belongs.
+        owner_name (str): The owner name of the repository.
 
     Returns:
         IssueDataclass: The transformed GitHub issue.
     """
 
-    repository = get_object_or_404(Repository, name=repository_name)
+    repository = get_object_or_404(Repository, name=repository_name, owner_name=owner_name)
 
     return IssueDataclass(
         title=issue["title"],

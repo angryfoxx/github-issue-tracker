@@ -65,7 +65,7 @@ def test_GitHubResponse_exception_handler(status_code, content, is_ok, expected_
         assert exc_info.value.detail == content["message"]
 
     elif expected_exception == exceptions.ValidationError:
-        assert exc_info.value.detail["message"].code == 1000
+        assert exc_info.value.detail["message"].code == "1000"
         assert exc_info.value.detail == content
 
 
