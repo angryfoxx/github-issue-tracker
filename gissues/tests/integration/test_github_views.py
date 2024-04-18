@@ -159,9 +159,8 @@ def test_RepositoryViewSet_unfollow(api_client, user_factory, repository_factory
 
 
 @pytest.mark.django_db
-def test_IssueViewSet_list(api_client, issue_factory, issue_comment_body_factory):
+def test_IssueViewSet_list(api_client, issue_factory):
     issue = issue_factory.create()
-    body = issue_comment_body_factory.create(issue=issue)
 
     response = api_client.get(
         reverse(
@@ -180,12 +179,13 @@ def test_IssueViewSet_list(api_client, issue_factory, issue_comment_body_factory
             "id": issue.id,
             "title": issue.title,
             "number": issue.number,
-            "body": body.body,
+            "body": issue.body,
             "is_closed": issue.is_closed,
             "closed_at": datetime.datetime.strftime(issue.closed_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
             "state_reason": issue.state_reason,
             "is_locked": issue.is_locked,
             "lock_reason": issue.lock_reason,
+            "comment_count": issue.comment_count,
             "created_at": datetime.datetime.strftime(issue.created_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
             "updated_at": datetime.datetime.strftime(issue.updated_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
         },
@@ -193,9 +193,8 @@ def test_IssueViewSet_list(api_client, issue_factory, issue_comment_body_factory
 
 
 @pytest.mark.django_db
-def test_IssueViewSet_retrieve_with_already_existing_issue(api_client, issue_factory, issue_comment_body_factory):
+def test_IssueViewSet_retrieve_with_already_existing_issue(api_client, issue_factory):
     issue = issue_factory.create()
-    body = issue_comment_body_factory.create(issue=issue)
 
     response = api_client.get(
         reverse(
@@ -212,12 +211,13 @@ def test_IssueViewSet_retrieve_with_already_existing_issue(api_client, issue_fac
         "id": issue.id,
         "title": issue.title,
         "number": issue.number,
-        "body": body.body,
+        "body": issue.body,
         "is_closed": issue.is_closed,
         "closed_at": datetime.datetime.strftime(issue.closed_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
         "state_reason": issue.state_reason,
         "is_locked": issue.is_locked,
         "lock_reason": issue.lock_reason,
+        "comment_count": issue.comment_count,
         "created_at": datetime.datetime.strftime(issue.created_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
         "updated_at": datetime.datetime.strftime(issue.updated_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
     }
@@ -232,6 +232,7 @@ def test_IssueViewSet_retrieve_with_non_existing_issue(mock_client, api_client, 
         "number": 1,
         "body": "This is a new feature.",
         "state": "open",
+        "comments": 0,
         "closed_at": None,
         "state_reason": None,
         "locked": False,
@@ -264,6 +265,7 @@ def test_IssueViewSet_retrieve_with_non_existing_issue(mock_client, api_client, 
         "state_reason": None,
         "is_locked": False,
         "lock_reason": None,
+        "comment_count": 0,
         "created_at": "2021-05-25T10:00:00Z",
         "updated_at": "2021-05-25T10:00:00Z",
     }
@@ -274,9 +276,8 @@ def test_IssueViewSet_retrieve_with_non_existing_issue(mock_client, api_client, 
 
 
 @pytest.mark.django_db
-def test_CommentsViewSet_list(api_client, comments_factory, issue_comment_body_factory):
+def test_CommentsViewSet_list(api_client, comments_factory):
     comment = comments_factory.create()
-    body = issue_comment_body_factory.create(comment=comment)
 
     response = api_client.get(
         reverse(
@@ -295,7 +296,7 @@ def test_CommentsViewSet_list(api_client, comments_factory, issue_comment_body_f
         {
             "id": comment.id,
             "comment_id": comment.comment_id,
-            "body": body.body,
+            "body": comment.body,
             "created_at": datetime.datetime.strftime(comment.created_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
             "updated_at": datetime.datetime.strftime(comment.updated_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
         },
@@ -303,11 +304,8 @@ def test_CommentsViewSet_list(api_client, comments_factory, issue_comment_body_f
 
 
 @pytest.mark.django_db
-def test_CommentsViewSet_retrieve_with_already_existing_comment(
-    api_client, comments_factory, issue_comment_body_factory
-):
+def test_CommentsViewSet_retrieve_with_already_existing_comment(api_client, comments_factory):
     comment = comments_factory.create()
-    body = issue_comment_body_factory.create(comment=comment)
 
     response = api_client.get(
         reverse(
@@ -324,7 +322,7 @@ def test_CommentsViewSet_retrieve_with_already_existing_comment(
     assert response.data == {
         "id": comment.id,
         "comment_id": comment.comment_id,
-        "body": body.body,
+        "body": comment.body,
         "created_at": datetime.datetime.strftime(comment.created_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
         "updated_at": datetime.datetime.strftime(comment.updated_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
     }

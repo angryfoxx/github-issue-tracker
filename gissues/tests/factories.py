@@ -3,7 +3,7 @@ import datetime
 import factory
 
 from gissues.extensions.auth.models import User, UserRepositoryFollow
-from gissues.extensions.github.models import Comments, Issue, IssueCommentBody, Repository
+from gissues.extensions.github.models import Comments, Issue, Repository
 
 
 class RepositoryFactory(factory.django.DjangoModelFactory):
@@ -27,12 +27,14 @@ class IssueFactory(factory.django.DjangoModelFactory):
 
     title = factory.Faker("sentence")
     number = factory.Sequence(lambda n: n)
+    body = factory.Faker("sentence")
     is_closed = factory.Faker("boolean")
     closed_at = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
     state_reason = factory.Faker("random_element", elements=[x[0] for x in Issue.StateReason.choices])
     is_locked = factory.Faker("boolean")
     lock_reason = factory.Faker("random_element", elements=[x[0] for x in Issue.LockReason.choices])
     repository = factory.SubFactory(RepositoryFactory)
+    comment_count = factory.Faker("random_int", min=0)
 
     created_at = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
     updated_at = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
@@ -43,18 +45,10 @@ class CommentsFactory(factory.django.DjangoModelFactory):
         model = Comments
 
     comment_id = factory.Sequence(lambda n: n)
+    body = factory.Faker("sentence")
     issue = factory.SubFactory(IssueFactory)
     created_at = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
     updated_at = factory.Faker("date_time", tzinfo=datetime.timezone.utc)
-
-
-class IssueCommentBodyFactory(factory.django.DjangoModelFactory):
-    class Meta:
-        model = IssueCommentBody
-
-    body = factory.Faker("sentence")
-    issue = factory.SubFactory(IssueFactory)
-    comment = factory.SubFactory(CommentsFactory)
 
 
 class UserFactory(factory.django.DjangoModelFactory):

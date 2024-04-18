@@ -51,6 +51,7 @@ def transform_issue(issue: dict[str, Any], repository_name: str, owner_name: str
         is_locked=issue["locked"],
         lock_reason=issue["active_lock_reason"],
         repository=repository,
+        comment_count=issue["comments"],
         created_at=issue["created_at"],
         updated_at=issue["updated_at"],
     )
@@ -64,7 +65,7 @@ def transform_comments(comment: dict[str, Any], issue_number: int) -> CommentsDa
         issue_number (int): The issue number where the comment belongs.
 
     Returns:
-        IssueCommentBodyDataclass: The transformed GitHub comment.
+        CommentsDataclass: The transformed GitHub comment.
     """
 
     issue = get_object_or_404(Issue, number=issue_number)

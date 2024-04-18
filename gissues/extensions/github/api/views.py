@@ -1,4 +1,4 @@
-from django.db.models import OuterRef, QuerySet, Subquery
+from django.db.models import QuerySet
 
 from rest_framework import permissions, status
 from rest_framework.decorators import action
@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 from gissues.extensions.auth.models import UserRepositoryFollow
 from gissues.extensions.github.api.serializers import CommentsSerializer, IssueSerializer, RepositorySerializer
-from gissues.extensions.github.models import Comments, Issue, IssueCommentBody, Repository
+from gissues.extensions.github.models import Comments, Issue, Repository
 from gissues.extensions.github.transformers import transform_comments, transform_issue, transform_repository
 from gissues.extensions.github_client.api.views import GitHubClientViewSet
 from gissues.extensions.github_client.client import github_client
@@ -74,9 +74,6 @@ class IssueViewSet(GitHubClientViewSet):
         repository = get_object_or_404(
             Repository, name=self.kwargs["repository_repository_name"], owner_name=self.kwargs["repository_owner"]
         )
-
-        qs = qs.annotate(body_text=Subquery(IssueCommentBody.objects.filter(issue=OuterRef("pk")).values("body")[:1]))
-
         return qs.filter(repository=repository)
 
     def get_object(self) -> Issue:
@@ -96,13 +93,8 @@ class IssueViewSet(GitHubClientViewSet):
         transformed_data = transform_issue(
             obj, self.kwargs["repository_repository_name"], self.kwargs["repository_owner"]
         ).dict()
-        body_text = transformed_data.pop("body", None)
 
         issue = Issue.objects.create(**transformed_data)
-
-        if body_text:
-            IssueCommentBody.objects.create(issue=issue, body=body_text)
-
         return self.get_queryset().get(pk=issue.pk)
 
 
@@ -116,9 +108,6 @@ class CommentsViewSet(GitHubClientViewSet):
     def get_queryset(self) -> QuerySet[Comments]:
         qs = super().get_queryset()
         issue = get_object_or_404(Issue, number=self.kwargs["issue_issue_number"])
-
-        qs = qs.annotate(body_text=Subquery(IssueCommentBody.objects.filter(comment=OuterRef("pk")).values("body")[:1]))
-
         return qs.filter(issue=issue)
 
     def get_object(self) -> Comments:
@@ -136,11 +125,7 @@ class CommentsViewSet(GitHubClientViewSet):
         )
 
         transformed_data = transform_comments(obj, self.kwargs["issue_issue_number"]).dict()
-        body_text = transformed_data.pop("body", None)
 
         comment = Comments.objects.create(**transformed_data)
-
-        if body_text:
-            IssueCommentBody.objects.create(issue=comment.issue, comment=comment, body=body_text)
 
         return self.get_queryset().get(pk=comment.pk)

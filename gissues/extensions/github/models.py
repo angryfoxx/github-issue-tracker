@@ -3,26 +3,9 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 
 
-class IssueCommentBody(models.Model):
-    body = models.TextField(max_length=65536)
-    issue = models.ForeignKey("Issue", related_name="body", on_delete=models.CASCADE)
-    comment = models.OneToOneField("Comments", related_name="body", on_delete=models.CASCADE, null=True)
-
-    history = HistoricalRecords()
-
-    class Meta:
-        verbose_name = "issue-comment body"
-        verbose_name_plural = "issue-comment bodies"
-        constraints = [
-            models.UniqueConstraint(fields=["issue", "comment"], name="unique_issue_comment_body"),
-        ]
-
-    def __str__(self) -> str:
-        return self.body
-
-
 class Comments(models.Model):
     comment_id = models.PositiveIntegerField(unique=True)
+    body = models.TextField(max_length=65536)
     issue = models.ForeignKey("Issue", related_name="comments", on_delete=models.CASCADE)
 
     created_at = models.DateTimeField()
@@ -53,6 +36,7 @@ class Issue(models.Model):
 
     title = models.CharField(max_length=256)
     number = models.PositiveIntegerField(unique=True)
+    body = models.TextField(max_length=65536)
     # the issue is open and state_reason can be null or reopened when the issue is closed
     is_closed = models.BooleanField(default=False)
     closed_at = models.DateTimeField(null=True)
@@ -60,6 +44,7 @@ class Issue(models.Model):
     is_locked = models.BooleanField(default=False)
     lock_reason = models.CharField(max_length=10, choices=LockReason.choices, null=True)
     repository = models.ForeignKey("Repository", related_name="issues", on_delete=models.CASCADE)
+    comment_count = models.PositiveIntegerField(default=0)
 
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()

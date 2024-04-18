@@ -34,6 +34,7 @@ class IssueDataclass(BaseDataclass):
     is_locked: bool
     lock_reason: Issue.LockReason
     repository: RepositoryDataclass | Repository
+    comment_count: int
     created_at: datetime
     updated_at: datetime
 

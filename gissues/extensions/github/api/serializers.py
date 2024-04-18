@@ -10,8 +10,6 @@ class RepositorySerializer(serializers.ModelSerializer[Repository]):
 
 
 class IssueSerializer(serializers.ModelSerializer[Issue]):
-    body = serializers.CharField(source="body_text")
-
     class Meta:
         model = Issue
         fields = (
@@ -24,14 +22,13 @@ class IssueSerializer(serializers.ModelSerializer[Issue]):
             "state_reason",
             "is_locked",
             "lock_reason",
+            "comment_count",
             "created_at",
             "updated_at",
         )
 
 
 class CommentsSerializer(serializers.ModelSerializer[Comments]):
-    body = serializers.CharField(source="body_text")
-
     class Meta:
         model = Comments
         fields = (

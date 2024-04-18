@@ -5,7 +5,6 @@ from pytest_factoryboy import register
 
 from gissues.tests.factories import (
     CommentsFactory,
-    IssueCommentBodyFactory,
     IssueFactory,
     RepositoryFactory,
     UserFactory,
@@ -35,6 +34,5 @@ def api_client():
 register(RepositoryFactory)
 register(IssueFactory)
 register(CommentsFactory)
-register(IssueCommentBodyFactory)
 register(UserFactory)
 register(UserRepositoryFollowFactory)

@@ -1,12 +1,8 @@
-import pytest
 from django.db import IntegrityError
 
-from gissues.extensions.github.models import (
-    Comments,
-    Issue,
-    IssueCommentBody,
-    Repository,
-)
+import pytest
+
+from gissues.extensions.github.models import Comments, Issue, Repository
 
 
 @pytest.mark.django_db
@@ -129,39 +125,3 @@ def test_comments_history(comments_factory):
     assert comments.history.first().issue == comments.issue
     assert comments.history.first().created_at == comments.created_at
     assert comments.history.first().updated_at == comments.updated_at
-
-
-@pytest.mark.django_db
-def test_issue_comment_body_creation_successful(issue_comment_body_factory):
-    issue_comment_body = issue_comment_body_factory.create()
-    assert IssueCommentBody.objects.count() == 1
-    assert issue_comment_body.body == IssueCommentBody.objects.first().body
-    assert issue_comment_body.issue == IssueCommentBody.objects.first().issue
-    assert issue_comment_body.comment == IssueCommentBody.objects.first().comment
-    assert str(issue_comment_body) == issue_comment_body.body
-
-
-@pytest.mark.django_db
-def test_issue_comment_body_history(issue_comment_body_factory):
-    issue_comment_body = issue_comment_body_factory.create()
-    assert issue_comment_body.history.count() == 1
-    assert issue_comment_body.history.first().history_user is None
-    assert issue_comment_body.history.first().history_type == "+"
-    assert issue_comment_body.history.first().history_change_reason is None
-    assert issue_comment_body.history.first().body == issue_comment_body.body
-    assert issue_comment_body.history.first().issue == issue_comment_body.issue
-    assert issue_comment_body.history.first().comment == issue_comment_body.comment
-
-
-@pytest.mark.django_db
-def test_issue_comment_body_creation_with_already_existing_issue_and_comment(
-    issue_comment_body_factory,
-):
-    first_issue_comment_body = issue_comment_body_factory.create()
-
-    second_issue_comment_body = issue_comment_body_factory.build(
-        issue=first_issue_comment_body.issue, comment=first_issue_comment_body.comment
-    )
-
-    with pytest.raises(IntegrityError):
-        second_issue_comment_body.save()

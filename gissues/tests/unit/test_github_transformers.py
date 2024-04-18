@@ -54,6 +54,7 @@ def test_transform_issue(mock_get_object_or_404, repository_factory):
         "number": 1,
         "body": "This is a new feature.",
         "state": "open",
+        "comments": 0,
         "closed_at": None,
         "state_reason": None,
         "locked": False,
@@ -68,6 +69,7 @@ def test_transform_issue(mock_get_object_or_404, repository_factory):
     )
     assert transformed_issue.title == issue["title"]
     assert transformed_issue.number == issue["number"]
+    assert transformed_issue.comment_count == issue["comments"]
     assert transformed_issue.body == issue["body"]
     assert transformed_issue.is_closed is False
     assert transformed_issue.closed_at == issue["closed_at"]
