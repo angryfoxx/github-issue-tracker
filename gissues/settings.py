@@ -21,6 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env.str("DJANGO_SECRET_KEY")
 DEBUG = env.bool("DJANGO_DEBUG")
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+SERVER_TYPE = env.str("SERVER_TYPE", "local")
 
 
 # Application definition
@@ -35,7 +36,6 @@ INSTALLED_APPS = [
     # Third party apps
     "rest_framework",
     "django_filters",
-    "django_extensions",
     "simple_history",
     # Local apps
     "gissues",
@@ -151,7 +151,6 @@ STATIC_URL = "/static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-SHELL_PLUS = "ipython"
 
 LOGGING = {
     "version": 1,
@@ -171,3 +170,18 @@ GITHUB_CLIENT_URL = env.str("GITHUB_CLIENT_URL", "https://api.github.com").rstri
 GITHUB_CLIENT_AUTH_TOKEN = env.str("GITHUB_CLIENT_AUTH_TOKEN", "")
 
 AUTH_USER_MODEL = "account.User"
+
+IS_LOCAL_ENV = DEBUG and SERVER_TYPE == "local"
+if IS_LOCAL_ENV:
+    INSTALLED_APPS.extend(
+        (
+            "debug_toolbar",
+            "django_extensions",
+        )
+    )
+    # Debug toolbar
+    MIDDLEWARE.append("debug_toolbar.middleware.DebugToolbarMiddleware")
+    INTERNAL_IPS = env.list("DEBUG_TOOLBAR_INTERNAL_IPS", ["127.0.0.1"])
+    DEBUG_TOOLBAR_CONFIG = {"SHOW_TOOLBAR_CALLBACK": lambda _: env.bool("IS_DEBUG_TOOLBAR_ENABLED", False)}
+
+    SHELL_PLUS = "ipython"

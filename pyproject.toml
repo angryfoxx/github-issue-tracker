@@ -28,6 +28,8 @@ django-simple-history = "^3.5.0"
 pytest-factoryboy = "^2.7.0"
 black = "^24.4.0"
 isort = "^5.13.2"
+drf-nested-routers = "^0.93.5"
+django-debug-toolbar = "^4.3.0"
 
 [tool.ruff]
 fix = true
