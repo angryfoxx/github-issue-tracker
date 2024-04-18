@@ -52,7 +52,7 @@ def test_RepositoryViewSet_retrieve_with_already_existing_repository(api_client,
     }
 
 
-@patch("gissues.extensions.github.views.github_client")
+@patch("gissues.extensions.github.api.views.github_client")
 @pytest.mark.django_db
 def test_RepositoryViewSet_retrieve_with_non_existing_repository(mock_client, api_client):
     repo = {
@@ -160,7 +160,7 @@ def test_IssueViewSet_retrieve_with_already_existing_issue(api_client, issue_fac
     }
 
 
-@patch("gissues.extensions.github.views.github_client")
+@patch("gissues.extensions.github.api.views.github_client")
 @pytest.mark.django_db
 def test_IssueViewSet_retrieve_with_non_existing_issue(mock_client, api_client, repository_factory):
     repo = repository_factory.create()
@@ -267,7 +267,7 @@ def test_CommentsViewSet_retrieve_with_already_existing_comment(
     }
 
 
-@patch("gissues.extensions.github.views.github_client")
+@patch("gissues.extensions.github.api.views.github_client")
 @pytest.mark.django_db
 def test_CommentsViewSet_retrieve_with_non_existing_comment(mock_client, api_client, issue_factory):
     issue = issue_factory.create()
