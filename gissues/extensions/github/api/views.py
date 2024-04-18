@@ -1,7 +1,11 @@
 from django.db.models import OuterRef, Subquery
 
+from rest_framework import permissions, status
+from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.response import Response
 
+from gissues.extensions.auth.models import UserRepositoryFollow
 from gissues.extensions.github.api.serializers import CommentsSerializer, IssueSerializer, RepositorySerializer
 from gissues.extensions.github.models import Comments, Issue, IssueCommentBody, Repository
 from gissues.extensions.github.transformers import transform_comments, transform_issue, transform_repository
@@ -36,6 +40,21 @@ class RepositoryViewSet(GitHubClientViewSet):
         transformed_data = transform_repository(obj).dict()
 
         return Repository.objects.create(**transformed_data)
+
+    @action(detail=True, methods=["POST"], permission_classes=[permissions.IsAuthenticated])
+    def follow(self, request, repository_owner, repository_name):
+        request_user = request.user
+
+        if UserRepositoryFollow.objects.filter(user=request_user, repository__name=repository_name).exists():
+            return Response(status=status.HTTP_200_OK)
+
+        UserRepositoryFollow.objects.create(user=request.user, repository=self.get_object())
+        return Response(status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["POST"], permission_classes=[permissions.IsAuthenticated])
+    def unfollow(self, request, repository_owner, repository_name):
+        UserRepositoryFollow.objects.filter(user=request.user, repository__name=repository_name).delete()
+        return Response(status=status.HTTP_200_OK)
 
 
 class IssueViewSet(GitHubClientViewSet):

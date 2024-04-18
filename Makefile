@@ -26,7 +26,7 @@ clean:
 	$(COMPOSE_CMD) rm -f
 
 django:
-	$(COMPOSE_CMD) exec web python3 manage.py $(ARGS)
+	$(COMPOSE_CMD) exec web python3 manage.py $(filter-out $@,$(MAKECMDGOALS))
 
 compile-requirements:
 	poetry export -f requirements.txt --output requirements.txt --without-hashes

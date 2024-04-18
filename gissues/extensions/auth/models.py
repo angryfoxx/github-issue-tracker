@@ -41,4 +41,4 @@ class UserRepositoryFollow(models.Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.user} -> {self.repository}"
+        return f"{self.user} follows {self.repository}"

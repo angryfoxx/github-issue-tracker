@@ -42,7 +42,7 @@ def test_user_repository_follow_creation_successful(user_repository_follow_facto
     assert User.objects.count() == 1
     assert user_repository_follow.user == User.objects.first()
     assert user_repository_follow.repository == user_repository_follow.repository
-    assert str(user_repository_follow) == f"{user_repository_follow.user} -> {user_repository_follow.repository}"
+    assert str(user_repository_follow) == f"{user_repository_follow.user} follows {user_repository_follow.repository}"
 
 
 @pytest.mark.django_db

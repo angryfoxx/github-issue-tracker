@@ -96,6 +96,69 @@ def test_RepositoryViewSet_retrieve_with_non_existing_repository(mock_client, ap
 
 
 @pytest.mark.django_db
+def test_RepositoryViewSet_follow_with_non_existing_follow(api_client, user_factory, repository_factory):
+    user = user_factory.create()
+    repo = repository_factory.create()
+
+    api_client.force_authenticate(user=user)
+
+    response = api_client.post(
+        reverse(
+            "repository-follow",
+            kwargs={"repository_owner": repo.owner_name, "repository_name": repo.name},
+        )
+    )
+
+    assert response.status_code == 200
+    assert user.repositories_followed.count() == 1
+    assert user.repositories_followed.first().repository == repo
+
+
+@pytest.mark.django_db
+def test_RepositoryViewSet_follow_with_existing_follow(
+    api_client, user_factory, repository_factory, user_repository_follow_factory
+):
+    user = user_factory.create()
+    repo = repository_factory.create()
+    user_repository_follow_factory.create(user=user, repository=repo)
+
+    assert user.repositories_followed.count() == 1
+
+    api_client.force_authenticate(user=user)
+
+    response = api_client.post(
+        reverse(
+            "repository-follow",
+            kwargs={"repository_owner": repo.owner_name, "repository_name": repo.name},
+        )
+    )
+
+    assert response.status_code == 200
+    assert user.repositories_followed.count() == 1
+
+
+@pytest.mark.django_db
+def test_RepositoryViewSet_unfollow(api_client, user_factory, repository_factory, user_repository_follow_factory):
+    user = user_factory.create()
+    repo = repository_factory.create()
+    user_repository_follow_factory.create(user=user, repository=repo)
+
+    assert user.repositories_followed.count() == 1
+
+    api_client.force_authenticate(user=user)
+
+    response = api_client.post(
+        reverse(
+            "repository-unfollow",
+            kwargs={"repository_owner": repo.owner_name, "repository_name": repo.name},
+        )
+    )
+
+    assert response.status_code == 200
+    assert user.repositories_followed.count() == 0
+
+
+@pytest.mark.django_db
 def test_IssueViewSet_list(api_client, issue_factory, issue_comment_body_factory):
     issue = issue_factory.create()
     body = issue_comment_body_factory.create(issue=issue)
