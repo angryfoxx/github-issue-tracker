@@ -1,11 +1,13 @@
 from unittest.mock import Mock, call, patch
 
+from rest_framework import exceptions, status
+
 import pytest
 from requests.exceptions import ConnectionError, Timeout
-from rest_framework import exceptions, status
 
 from gissues.extensions.github_client.client import (
     GitHubClient,
+    GitHubComments,
     GitHubIssues,
     GitHubRepositories,
     GitHubResponse,
@@ -240,6 +242,14 @@ def test_GitHubClient_repositories_property(mock_github_repositories):
     mock_github_repositories.assert_called_once_with(client)
 
 
+@patch("gissues.extensions.github_client.client.GitHubComments")
+def test_GitHubClient_comments_property(mock_github_comments):
+    client = GitHubClient()
+    assert client.comments == mock_github_comments.return_value
+
+    mock_github_comments.assert_called_once_with(client)
+
+
 def test_GitHubIssues_list(mocked_github_client):
     client = GitHubIssues(mocked_github_client)
     response = client.list("owner", "repo")
@@ -282,3 +292,25 @@ def test_GitHubRepositories_detail(mocked_github_client):
     assert response.is_ok is True
 
     mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner/repo")
+
+
+def test_GitHubComments_list(mocked_github_client):
+    client = GitHubComments(mocked_github_client)
+    response = client.list("owner", "repo", 1)
+
+    assert response.status_code == 200
+    assert response.content == {"dummy": "data"}
+    assert response.is_ok is True
+
+    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner/repo/issues/1/comments")
+
+
+def test_GitHubComments_detail(mocked_github_client):
+    client = GitHubComments(mocked_github_client)
+    response = client.detail("owner", "repo", 1)
+
+    assert response.status_code == 200
+    assert response.content == {"dummy": "data"}
+    assert response.is_ok is True
+
+    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner/repo/issues/comments/1")
