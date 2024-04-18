@@ -17,6 +17,9 @@ from gissues.extensions.github_client.client import github_client
 class RepositoryViewSet(GitHubClientViewSet):
     serializer_class = RepositorySerializer
     queryset = Repository.objects.all()
+    model = Repository
+    transform_function = staticmethod(transform_repository)
+    client_detail_function = github_client.repositories.detail
     lookup_field = "name"
     lookup_url_kwarg = "repository_name"
     ordering = ["name"]
@@ -26,21 +29,12 @@ class RepositoryViewSet(GitHubClientViewSet):
         return qs.filter(owner_name=self.kwargs["repository_owner"])
 
     def get_object(self) -> Repository:
-        qs = self.get_queryset()
-        repository_name = self.kwargs[self.lookup_url_kwarg]
-
-        if obj := qs.filter(name=repository_name).first():
-            return obj
-
-        obj = self.get_object_from_github(
-            github_client.repositories.detail,
-            owner=self.kwargs["repository_owner"],
-            repository_name=repository_name,
+        return self.get_object_or_sync(
+            {
+                "owner_name": self.kwargs["repository_owner"],
+                "repository_name": self.kwargs["repository_name"],
+            }
         )
-
-        transformed_data = transform_repository(obj).dict()
-
-        return Repository.objects.create(**transformed_data)
 
     @action(detail=True, methods=["POST"], permission_classes=[permissions.IsAuthenticated])
     def follow(self, request: Request, repository_owner: str, repository_name: str) -> Response:
@@ -65,6 +59,9 @@ class RepositoryViewSet(GitHubClientViewSet):
 class IssueViewSet(GitHubClientViewSet):
     serializer_class = IssueSerializer
     queryset = Issue.objects.all()
+    model = Issue
+    transform_function = staticmethod(transform_issue)
+    client_detail_function = github_client.issues.detail
     lookup_field = "number"
     lookup_url_kwarg = "issue_number"
     ordering = ["number"]
@@ -77,30 +74,24 @@ class IssueViewSet(GitHubClientViewSet):
         return qs.filter(repository=repository)
 
     def get_object(self) -> Issue:
-        queryset = self.get_queryset()
-        issue_number = self.kwargs[self.lookup_url_kwarg]
-
-        if obj := queryset.filter(number=issue_number).first():
-            return obj
-
-        obj = self.get_object_from_github(
-            github_client.issues.detail,
-            owner=self.kwargs["repository_owner"],
-            repository_name=self.kwargs["repository_repository_name"],
-            issue_number=issue_number,
+        repository_name = self.kwargs["repository_repository_name"]
+        owner_name = self.kwargs["repository_owner"]
+        return self.get_object_or_sync(
+            {
+                "owner_name": owner_name,
+                "repository_name": repository_name,
+                "issue_number": self.kwargs["issue_number"],
+            },
+            {"repository_name": repository_name, "owner_name": owner_name},
         )
-
-        transformed_data = transform_issue(
-            obj, self.kwargs["repository_repository_name"], self.kwargs["repository_owner"]
-        ).dict()
-
-        issue = Issue.objects.create(**transformed_data)
-        return self.get_queryset().get(pk=issue.pk)
 
 
 class CommentsViewSet(GitHubClientViewSet):
     serializer_class = CommentsSerializer
     queryset = Comments.objects.all()
+    model = Comments
+    transform_function = staticmethod(transform_comments)
+    client_detail_function = github_client.comments.detail
     lookup_field = "comment_id"
     lookup_url_kwarg = "comment_id"
     ordering = ["created_at"]
@@ -111,21 +102,12 @@ class CommentsViewSet(GitHubClientViewSet):
         return qs.filter(issue=issue)
 
     def get_object(self) -> Comments:
-        queryset = self.get_queryset()
-        comment_id = self.kwargs[self.lookup_url_kwarg]
-
-        if obj := queryset.filter(comment_id=comment_id).first():
-            return obj
-
-        obj = self.get_object_from_github(
-            github_client.comments.detail,
-            owner=self.kwargs["repository_owner"],
-            repository_name=self.kwargs["repository_repository_name"],
-            comment_id=comment_id,
+        issue_number = self.kwargs["issue_issue_number"]
+        return self.get_object_or_sync(
+            {
+                "owner_name": self.kwargs["repository_owner"],
+                "repository_name": self.kwargs["repository_repository_name"],
+                "comment_id": self.kwargs["comment_id"],
+            },
+            {"issue_number": issue_number},
         )
-
-        transformed_data = transform_comments(obj, self.kwargs["issue_issue_number"]).dict()
-
-        comment = Comments.objects.create(**transformed_data)
-
-        return self.get_queryset().get(pk=comment.pk)

@@ -52,9 +52,9 @@ def test_RepositoryViewSet_retrieve_with_already_existing_repository(api_client,
     }
 
 
-@patch("gissues.extensions.github.api.views.github_client")
+@patch("gissues.extensions.github.api.views.RepositoryViewSet.client_detail_function")
 @pytest.mark.django_db
-def test_RepositoryViewSet_retrieve_with_non_existing_repository(mock_client, api_client):
+def test_RepositoryViewSet_retrieve_with_non_existing_repository(mock_detail_client, api_client):
     repo = {
         "name": "gissues",
         "owner": {"login": "gissues"},
@@ -67,7 +67,7 @@ def test_RepositoryViewSet_retrieve_with_non_existing_repository(mock_client, ap
     }
 
     mock_detail = Mock(spec=GitHubResponse, is_ok=True, content=repo, status_code=200)
-    mock_client.repositories.detail.return_value = mock_detail
+    mock_detail_client.return_value = mock_detail
 
     response = api_client.get(
         reverse(
@@ -92,7 +92,7 @@ def test_RepositoryViewSet_retrieve_with_non_existing_repository(mock_client, ap
         "pushed_at": "2021-05-25T10:00:00Z",
     }
 
-    mock_client.repositories.detail.assert_called_once_with(owner="gissues", repository_name="gissues")
+    mock_detail_client.assert_called_once_with(owner_name="gissues", repository_name="gissues")
 
 
 @pytest.mark.django_db
@@ -223,9 +223,9 @@ def test_IssueViewSet_retrieve_with_already_existing_issue(api_client, issue_fac
     }
 
 
-@patch("gissues.extensions.github.api.views.github_client")
+@patch("gissues.extensions.github.api.views.IssueViewSet.client_detail_function")
 @pytest.mark.django_db
-def test_IssueViewSet_retrieve_with_non_existing_issue(mock_client, api_client, repository_factory):
+def test_IssueViewSet_retrieve_with_non_existing_issue(mock_detail_client, api_client, repository_factory):
     repo = repository_factory.create()
     issue = {
         "title": "Add a new feature",
@@ -242,7 +242,7 @@ def test_IssueViewSet_retrieve_with_non_existing_issue(mock_client, api_client, 
     }
 
     mock_detail = Mock(spec=GitHubResponse, is_ok=True, content=issue, status_code=200)
-    mock_client.issues.detail.return_value = mock_detail
+    mock_detail_client.return_value = mock_detail
 
     response = api_client.get(
         reverse(
@@ -270,9 +270,7 @@ def test_IssueViewSet_retrieve_with_non_existing_issue(mock_client, api_client, 
         "updated_at": "2021-05-25T10:00:00Z",
     }
 
-    mock_client.issues.detail.assert_called_once_with(
-        owner=repo.owner_name, repository_name=repo.name, issue_number="1"
-    )
+    mock_detail_client.assert_called_once_with(owner_name=repo.owner_name, repository_name=repo.name, issue_number="1")
 
 
 @pytest.mark.django_db
@@ -328,9 +326,9 @@ def test_CommentsViewSet_retrieve_with_already_existing_comment(api_client, comm
     }
 
 
-@patch("gissues.extensions.github.api.views.github_client")
+@patch("gissues.extensions.github.api.views.CommentsViewSet.client_detail_function")
 @pytest.mark.django_db
-def test_CommentsViewSet_retrieve_with_non_existing_comment(mock_client, api_client, issue_factory):
+def test_CommentsViewSet_retrieve_with_non_existing_comment(mock_detail_client, api_client, issue_factory):
     issue = issue_factory.create()
     comment_data = {
         "id": 1,
@@ -340,7 +338,7 @@ def test_CommentsViewSet_retrieve_with_non_existing_comment(mock_client, api_cli
     }
 
     mock_detail = Mock(spec=GitHubResponse, is_ok=True, content=comment_data, status_code=200)
-    mock_client.comments.detail.return_value = mock_detail
+    mock_detail_client.return_value = mock_detail
 
     response = api_client.get(
         reverse(
@@ -366,8 +364,8 @@ def test_CommentsViewSet_retrieve_with_non_existing_comment(mock_client, api_cli
         "updated_at": "2021-05-25T10:00:00Z",
     }
 
-    mock_client.comments.detail.assert_called_once_with(
-        owner=issue.repository.owner_name,
+    mock_detail_client.assert_called_once_with(
+        owner_name=issue.repository.owner_name,
         repository_name=issue.repository.name,
         comment_id="1",
     )

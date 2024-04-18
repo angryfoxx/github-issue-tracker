@@ -252,24 +252,24 @@ def test_GitHubClient_comments_property(mock_github_comments):
 
 def test_GitHubIssues_list(mocked_github_client):
     client = GitHubIssues(mocked_github_client)
-    response = client.list("owner", "repo")
+    response = client.list("owner_name", "repo")
 
     assert response.status_code == 200
     assert response.content == {"dummy": "data"}
     assert response.is_ok is True
 
-    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner/repo/issues?state=all")
+    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner_name/repo/issues?state=all")
 
 
 def test_GitHubIssues_detail(mocked_github_client):
     client = GitHubIssues(mocked_github_client)
-    response = client.detail("owner", "repo", 1)
+    response = client.detail("owner_name", "repo", 1)
 
     assert response.status_code == 200
     assert response.content == {"dummy": "data"}
     assert response.is_ok is True
 
-    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner/repo/issues/1")
+    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner_name/repo/issues/1")
 
 
 def test_GitHubRepositories_list(mocked_github_client):
@@ -285,32 +285,32 @@ def test_GitHubRepositories_list(mocked_github_client):
 
 def test_GitHubRepositories_detail(mocked_github_client):
     client = GitHubRepositories(mocked_github_client)
-    response = client.detail("owner", "repo")
+    response = client.detail("owner_name", "repo")
 
     assert response.status_code == 200
     assert response.content == {"dummy": "data"}
     assert response.is_ok is True
 
-    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner/repo")
+    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner_name/repo")
 
 
 def test_GitHubComments_list(mocked_github_client):
     client = GitHubComments(mocked_github_client)
-    response = client.list("owner", "repo", 1)
+    response = client.list("owner_name", "repo", 1)
 
     assert response.status_code == 200
     assert response.content == {"dummy": "data"}
     assert response.is_ok is True
 
-    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner/repo/issues/1/comments")
+    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner_name/repo/issues/1/comments")
 
 
 def test_GitHubComments_detail(mocked_github_client):
     client = GitHubComments(mocked_github_client)
-    response = client.detail("owner", "repo", 1)
+    response = client.detail("owner_name", "repo", 1)
 
     assert response.status_code == 200
     assert response.content == {"dummy": "data"}
     assert response.is_ok is True
 
-    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner/repo/issues/comments/1")
+    mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner_name/repo/issues/comments/1")

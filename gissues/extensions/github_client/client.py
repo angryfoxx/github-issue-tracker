@@ -157,31 +157,31 @@ class GitHubClient:
 
 
 class GitHubIssues:
-    _path_list = "/repos/%(owner)s/%(repository_name)s/issues?state=all"
-    _path_detail = "/repos/%(owner)s/%(repository_name)s/issues/%(issue_number)s"
+    _path_list = "/repos/%(owner_name)s/%(repository_name)s/issues?state=all"
+    _path_detail = "/repos/%(owner_name)s/%(repository_name)s/issues/%(issue_number)s"
 
     def __init__(self, base_client: GitHubClient):
         self.base_client = base_client
 
-    def list(self, owner: str, repository_name: str) -> GitHubResponse:
+    def list(self, owner_name: str, repository_name: str) -> GitHubResponse:
         """List issues for a repository.
 
         Args:
-            owner (str): The repository owner.
+            owner_name (str): The repository owner_name.
             repository_name (str): The repository name.
 
         Returns:
             GitHubResponse: The response from the GitHub API.
 
         """
-        url = self._path_list % {"owner": owner, "repository_name": repository_name}
+        url = self._path_list % {"owner_name": owner_name, "repository_name": repository_name}
         return self.base_client.make_request("GET", url)
 
-    def detail(self, owner: str, repository_name: str, issue_number: int | str) -> GitHubResponse:
+    def detail(self, owner_name: str, repository_name: str, issue_number: int | str) -> GitHubResponse:
         """Get details for an issue.
 
         Args:
-            owner (str): The repository owner.
+            owner_name (str): The repository owner_name.
             repository_name (str): The repository name.
             issue_number (int | str): The issue number.
 
@@ -190,7 +190,7 @@ class GitHubIssues:
 
         """
         url = self._path_detail % {
-            "owner": owner,
+            "owner_name": owner_name,
             "repository_name": repository_name,
             "issue_number": issue_number,
         }
@@ -199,7 +199,7 @@ class GitHubIssues:
 
 class GitHubRepositories:
     _path_list = "/users/%(username)s/repos"
-    _path_detail = "/repos/%(owner)s/%(repository_name)s"
+    _path_detail = "/repos/%(owner_name)s/%(repository_name)s"
 
     def __init__(self, base_client: GitHubClient):
         self.base_client = base_client
@@ -217,33 +217,33 @@ class GitHubRepositories:
         url = self._path_list % {"username": username}
         return self.base_client.make_request("GET", url)
 
-    def detail(self, owner: str, repository_name: str) -> GitHubResponse:
+    def detail(self, owner_name: str, repository_name: str) -> GitHubResponse:
         """Get details for a repository.
 
         Args:
-            owner (str): The repository owner.
+            owner_name (str): The repository owner_name.
             repository_name (str): The repository name.
 
         Returns:
             GitHubResponse: The response from the GitHub API.
 
         """
-        url = self._path_detail % {"owner": owner, "repository_name": repository_name}
+        url = self._path_detail % {"owner_name": owner_name, "repository_name": repository_name}
         return self.base_client.make_request("GET", url)
 
 
 class GitHubComments:
-    _path_list = "/repos/%(owner)s/%(repository_name)s/issues/%(issue_number)s/comments"
-    _path_detail = "/repos/%(owner)s/%(repository_name)s/issues/comments/%(comment_id)s"
+    _path_list = "/repos/%(owner_name)s/%(repository_name)s/issues/%(issue_number)s/comments"
+    _path_detail = "/repos/%(owner_name)s/%(repository_name)s/issues/comments/%(comment_id)s"
 
     def __init__(self, base_client: GitHubClient):
         self.base_client = base_client
 
-    def list(self, owner: str, repository_name: str, issue_number: int | str) -> GitHubResponse:
+    def list(self, owner_name: str, repository_name: str, issue_number: int | str) -> GitHubResponse:
         """List comments for an issue.
 
         Args:
-            owner (str): The repository owner.
+            owner_name (str): The repository owner_name.
             repository_name (str): The repository name.
             issue_number (int | str): The issue number.
 
@@ -252,17 +252,17 @@ class GitHubComments:
 
         """
         url = self._path_list % {
-            "owner": owner,
+            "owner_name": owner_name,
             "repository_name": repository_name,
             "issue_number": issue_number,
         }
         return self.base_client.make_request("GET", url)
 
-    def detail(self, owner: str, repository_name: str, comment_id: int | str) -> GitHubResponse:
+    def detail(self, owner_name: str, repository_name: str, comment_id: int | str) -> GitHubResponse:
         """Get details for a comment.
 
         Args:
-            owner (str): The repository owner.
+            owner_name (str): The repository owner_name.
             repository_name (str): The repository name.
             comment_id (int | str): The comment ID.
 
@@ -271,7 +271,7 @@ class GitHubComments:
 
         """
         url = self._path_detail % {
-            "owner": owner,
+            "owner_name": owner_name,
             "repository_name": repository_name,
             "comment_id": comment_id,
         }

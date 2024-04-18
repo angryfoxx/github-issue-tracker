@@ -50,7 +50,10 @@ def test_get_object_from_github():
     mock_response = Mock(spec=GitHubResponse, is_ok=True, content={"key": "value"}, status_code=200)
     mock_func = Mock(return_value=mock_response)
 
-    obj = GitHubClientViewSet.get_object_from_github(mock_func, key="value")
+    viewset = GitHubClientViewSet()
+    viewset.client_detail_function = mock_func
+
+    obj = viewset.get_object_from_github(key="value")
 
     assert obj == {"key": "value"}
 
@@ -62,9 +65,57 @@ def test_get_object_from_github_raises_exception():
     mock_response.exception_handler = Mock(side_effect=Exception("Not Found"))
     mock_func = Mock(return_value=mock_response)
 
+    viewset = GitHubClientViewSet()
+    viewset.client_detail_function = mock_func
+
     with pytest.raises(Exception) as exc_info:
-        GitHubClientViewSet.get_object_from_github(mock_func, key="value")
+        viewset.get_object_from_github(key="value")
 
     assert str(exc_info.value) == "Not Found"
 
     mock_func.assert_called_once_with(key="value")
+
+
+def test_get_object_or_sync_existing_object():
+    mock_qs = Mock()
+    mock_qs.filter.return_value.first.return_value = "existing_object"
+
+    viewset = GitHubClientViewSet()
+    viewset.get_queryset = Mock(return_value=mock_qs)
+    viewset.kwargs = {"number": 1}
+    viewset.lookup_field = "number"
+
+    obj = viewset.get_object_or_sync({"number": 1})
+
+    assert obj == "existing_object"
+
+    mock_qs.filter.assert_called_once_with(number=1)
+    mock_qs.filter.return_value.first.assert_called_once()
+
+
+def test_get_object_or_sync_new_object():
+    mock_qs = Mock()
+    mock_qs.filter.return_value.first.return_value = None
+
+    mock_response = Mock(spec=GitHubResponse, is_ok=True, content={"key": "value"}, status_code=200)
+    mock_func = Mock(return_value=mock_response)
+
+    viewset = GitHubClientViewSet()
+    viewset.get_queryset = Mock(return_value=mock_qs)
+    viewset.client_detail_function = mock_func
+    viewset.model = Mock()
+    transform_function = Mock()
+    transform_function.return_value.dict.return_value = {"key": "value"}
+    viewset.transform_function = transform_function
+    viewset.kwargs = {"number": 1}
+    viewset.lookup_field = "number"
+
+    obj = viewset.get_object_or_sync({"number": 1})
+
+    assert obj == viewset.model.objects.create.return_value
+
+    mock_qs.filter.assert_called_once_with(number=1)
+    mock_qs.filter.return_value.first.assert_called_once()
+    mock_func.assert_called_once_with(number=1)
+    viewset.transform_function.assert_called_once_with({"key": "value"})
+    viewset.model.objects.create.assert_called_once_with(key="value")
