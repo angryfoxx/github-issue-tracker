@@ -34,4 +34,7 @@ compile-requirements:
 test:
 	$(COMPOSE_CMD) exec web pytest
 
-.PHONY: build up down logs restart stop start clean compile-requirements django test
+mypy:
+	$(COMPOSE_CMD) exec web mypy gissues/.
+
+.PHONY: build up down logs restart stop start clean compile-requirements django test mypy

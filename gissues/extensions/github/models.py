@@ -17,7 +17,7 @@ class IssueCommentBody(models.Model):
             models.UniqueConstraint(fields=["issue", "comment"], name="unique_issue_comment_body"),
         ]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.body
 
 
@@ -34,7 +34,7 @@ class Comments(models.Model):
         verbose_name = "comment"
         verbose_name_plural = "comments"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"C{self.comment_id}"
 
 
@@ -70,7 +70,7 @@ class Issue(models.Model):
         verbose_name = "issue"
         verbose_name_plural = "issues"
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.title
 
 
@@ -92,5 +92,5 @@ class Repository(models.Model):
         verbose_name_plural = "repositories"
         constraints = [models.UniqueConstraint(fields=["name", "owner_name"], name="unique_repository")]
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.name

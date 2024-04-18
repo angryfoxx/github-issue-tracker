@@ -1,3 +1,6 @@
+from django.contrib.auth.base_user import AbstractBaseUser
+from django.db.models import QuerySet
+
 from rest_framework import mixins, permissions
 from rest_framework.filters import OrderingFilter
 from rest_framework.viewsets import GenericViewSet
@@ -16,7 +19,8 @@ class UserRepositoryFollowViewSet(mixins.ListModelMixin, GenericViewSet):
     filter_backends = [OrderingFilter]
     ordering = ["id"]
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[Repository]:
+        request_user: AbstractBaseUser = self.request.user
         return Repository.objects.filter(
-            followers__user=self.request.user,
+            followers__user=request_user,
         )

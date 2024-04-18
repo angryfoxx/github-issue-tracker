@@ -1,12 +1,13 @@
 from dataclasses import asdict, dataclass
 from datetime import datetime
+from typing import Any
 
 from gissues.extensions.github.models import Issue, Repository
 
 
 @dataclass
 class BaseDataclass:
-    def dict(self):
+    def dict(self) -> dict[str, Any]:
         return {k: v for k, v in asdict(self).items() if v is not None}
 
 

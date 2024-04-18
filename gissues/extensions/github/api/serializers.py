@@ -3,13 +3,13 @@ from rest_framework import serializers
 from gissues.extensions.github.models import Comments, Issue, Repository
 
 
-class RepositorySerializer(serializers.ModelSerializer):
+class RepositorySerializer(serializers.ModelSerializer[Repository]):
     class Meta:
         model = Repository
         fields = "__all__"
 
 
-class IssueSerializer(serializers.ModelSerializer):
+class IssueSerializer(serializers.ModelSerializer[Issue]):
     body = serializers.CharField(source="body_text")
 
     class Meta:
@@ -29,7 +29,7 @@ class IssueSerializer(serializers.ModelSerializer):
         )
 
 
-class CommentsSerializer(serializers.ModelSerializer):
+class CommentsSerializer(serializers.ModelSerializer[Comments]):
     body = serializers.CharField(source="body_text")
 
     class Meta:

@@ -1,7 +1,12 @@
-from rest_framework.pagination import PageNumberPagination
+from typing import Optional, Any
+
+from rest_framework.pagination import CursorPagination, LimitOffsetPagination, PageNumberPagination
 
 
-def pagination_factory(base=None, **attrs):
+def pagination_factory(
+    base: Optional[type[PageNumberPagination] | type[CursorPagination] | type[LimitOffsetPagination]] = None,
+    **kwargs: Any,
+) -> type:
     """Creates a pagination class.
 
     Creates a pagination class that inherits from the given base class and
@@ -15,9 +20,9 @@ def pagination_factory(base=None, **attrs):
     These can be set via the API as query parameters (e.g. ?page=1&page_size=10).
 
     Args:
-        base (PageNumberPagination, optional): The base class to inherit from.
-            Defaults to PageNumberPagination.
-        **attrs: The attributes to add to the pagination class.
+        base (PageNumberPagination, CursorPagination, LimitOffsetPagination): The base pagination class.
+            Defaults to None.
+        **kwargs: The attributes to add to the pagination class.
 
     Returns:
         type: The pagination class.
@@ -29,7 +34,7 @@ def pagination_factory(base=None, **attrs):
     ...     pagination_class = pagination_factory(page_size=10)
     """
     base = base or PageNumberPagination
-    attrs.setdefault("page_size_query_param", "page_size")
-    attrs.setdefault("max_page_size", 99_999)
-    attrs.setdefault("page_query_param", "page")
-    return type("FactoryPagination", (base,), attrs)
+    kwargs.setdefault("page_size_query_param", "page_size")
+    kwargs.setdefault("max_page_size", 99_999)
+    kwargs.setdefault("page_query_param", "page")
+    return type("FactoryPagination", (base,), kwargs)

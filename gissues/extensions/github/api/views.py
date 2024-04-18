@@ -1,8 +1,9 @@
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, QuerySet, Subquery
 
 from rest_framework import permissions, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
+from rest_framework.request import Request
 from rest_framework.response import Response
 
 from gissues.extensions.auth.models import UserRepositoryFollow
@@ -20,11 +21,11 @@ class RepositoryViewSet(GitHubClientViewSet):
     lookup_url_kwarg = "repository_name"
     ordering = ["name"]
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[Repository]:
         qs = super().get_queryset()
         return qs.filter(owner_name=self.kwargs["repository_owner"])
 
-    def get_object(self):
+    def get_object(self) -> Repository:
         qs = self.get_queryset()
         repository_name = self.kwargs[self.lookup_url_kwarg]
 
@@ -42,7 +43,7 @@ class RepositoryViewSet(GitHubClientViewSet):
         return Repository.objects.create(**transformed_data)
 
     @action(detail=True, methods=["POST"], permission_classes=[permissions.IsAuthenticated])
-    def follow(self, request, repository_owner, repository_name):
+    def follow(self, request: Request, repository_owner: str, repository_name: str) -> Response:
         request_user = request.user
 
         if UserRepositoryFollow.objects.filter(user=request_user, repository__name=repository_name).exists():
@@ -52,7 +53,7 @@ class RepositoryViewSet(GitHubClientViewSet):
         return Response(status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["POST"], permission_classes=[permissions.IsAuthenticated])
-    def unfollow(self, request, repository_owner, repository_name):
+    def unfollow(self, request: Request, repository_owner: str, repository_name: str) -> Response:
         UserRepositoryFollow.objects.filter(user=request.user, repository__name=repository_name).delete()
         return Response(status=status.HTTP_200_OK)
 
@@ -64,7 +65,7 @@ class IssueViewSet(GitHubClientViewSet):
     lookup_url_kwarg = "issue_number"
     ordering = ["number"]
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[Issue]:
         qs = super().get_queryset()
         repository = get_object_or_404(Repository, name=self.kwargs["repository_repository_name"])
 
@@ -72,7 +73,7 @@ class IssueViewSet(GitHubClientViewSet):
 
         return qs.filter(repository=repository)
 
-    def get_object(self):
+    def get_object(self) -> Issue:
         queryset = self.get_queryset()
         issue_number = self.kwargs[self.lookup_url_kwarg]
 
@@ -104,7 +105,7 @@ class CommentsViewSet(GitHubClientViewSet):
     lookup_url_kwarg = "comment_id"
     ordering = ["created_at"]
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[Comments]:
         qs = super().get_queryset()
         issue = get_object_or_404(Issue, number=self.kwargs["issue_issue_number"])
 
@@ -112,7 +113,7 @@ class CommentsViewSet(GitHubClientViewSet):
 
         return qs.filter(issue=issue)
 
-    def get_object(self):
+    def get_object(self) -> Comments:
         queryset = self.get_queryset()
         comment_id = self.kwargs[self.lookup_url_kwarg]
 

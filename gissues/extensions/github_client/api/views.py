@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Callable, Union
 
 from rest_framework import serializers
 from rest_framework.filters import OrderingFilter
@@ -13,13 +13,13 @@ class GitHubClientViewSet(ReadOnlyModelViewSet):
     pagination_class = pagination_factory(page_size=10)
     filter_backends = [OrderingFilter]
 
-    def get_serializer_class(self):
+    def get_serializer_class(self) -> type[serializers.BaseSerializer[Any]]:
         serializer = self.serializer_classes.get(self.action, self.serializer_class)
         assert serializer is not None
         return serializer
 
     @staticmethod
-    def get_object_from_github(func: callable, **kwargs):
+    def get_object_from_github(func: Callable[..., Any], **kwargs: Any) -> Union[dict[str, Any], Any]:
         obj: GitHubResponse = func(**kwargs)
         if not obj.is_ok:
             raise obj.exception_handler()

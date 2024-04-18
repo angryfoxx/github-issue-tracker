@@ -1,14 +1,16 @@
+from typing import Any
+
 from rest_framework.generics import get_object_or_404
 
 from gissues.extensions.github.dataclasses import CommentsDataclass, IssueDataclass, RepositoryDataclass
 from gissues.extensions.github.models import Issue, Repository
 
 
-def transform_repository(repository: dict) -> RepositoryDataclass:
+def transform_repository(repository: dict[str, Any]) -> RepositoryDataclass:
     """Transforms a GitHub repository to a dictionary with the required fields.
 
     Args:
-        repository (dict): The GitHub repository to transform.
+        repository (dict[str, Any]): The GitHub repository to transform.
 
     Returns:
         RepositoryDataclass: The transformed GitHub repository.
@@ -25,11 +27,11 @@ def transform_repository(repository: dict) -> RepositoryDataclass:
     )
 
 
-def transform_issue(issue: dict, repository_name: str) -> IssueDataclass:
+def transform_issue(issue: dict[str, Any], repository_name: str) -> IssueDataclass:
     """Transforms a GitHub issue to a dictionary with the required fields.
 
     Args:
-        issue (dict): The GitHub issue to transform.
+        issue (dict[str, Any]): The GitHub issue to transform.
         repository_name (str): The repository name where the issue belongs.
 
     Returns:
@@ -53,11 +55,11 @@ def transform_issue(issue: dict, repository_name: str) -> IssueDataclass:
     )
 
 
-def transform_comments(comment: dict, issue_number: int) -> CommentsDataclass:
+def transform_comments(comment: dict[str, Any], issue_number: int) -> CommentsDataclass:
     """Transforms a GitHub comment to a dictionary with the required fields.
 
     Args:
-        comment (dict): The GitHub comment to transform.
+        comment (dict[str, Any]): The GitHub comment to transform.
         issue_number (int): The issue number where the comment belongs.
 
     Returns:

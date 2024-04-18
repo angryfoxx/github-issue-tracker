@@ -1,6 +1,7 @@
+import json
 import logging
 from dataclasses import dataclass
-from typing import Optional
+from typing import Any, MutableMapping, Optional
 
 from django.conf import settings
 
@@ -23,10 +24,10 @@ class ServiceUnavailable(exceptions.APIException):
 @dataclass
 class GitHubResponse:
     status_code: int
-    content: dict
+    content: dict[str, Any]
     is_ok: bool
 
-    def exception_handler(self):
+    def exception_handler(self) -> None:
         assert not self.is_ok
 
         if self.status_code >= status.HTTP_500_INTERNAL_SERVER_ERROR:
@@ -35,7 +36,7 @@ class GitHubResponse:
         if self.status_code == status.HTTP_404_NOT_FOUND:
             raise exceptions.NotFound("Resource not found on GitHub.")
 
-        raise serializers.ValidationError(self.content, code=1000)
+        raise serializers.ValidationError(self.content, code="1000")
 
 
 class GitHubClient:
@@ -43,7 +44,7 @@ class GitHubClient:
     client_token = settings.GITHUB_CLIENT_AUTH_TOKEN
 
     @property
-    def session(self):
+    def session(self) -> requests.Session:
         session = requests.Session()
         session.headers.update(
             {
@@ -58,14 +59,16 @@ class GitHubClient:
         return session
 
     @staticmethod
-    def _mask_secret_info(data: Optional[dict] = None) -> Optional[dict]:
+    def _mask_secret_info(
+        data: Optional[dict[str, Any] | MutableMapping[str, Any]],
+    ) -> Optional[dict[str, Any] | MutableMapping[str, Any]]:
         """Mask secret information in the data.
 
         Args:
-            data (Optional[dict]): The data to mask.
+            data (Optional[dict[str, Any] | MutableMapping[str, Any]]): The data to mask.
 
         Returns:
-            dict | None: The masked data.
+            Optional[dict[str, Any] | MutableMapping[str, Any]]: The masked data.
 
         """
         if not data:
@@ -81,13 +84,13 @@ class GitHubClient:
 
     def _log_request(
         self,
-        method,
-        url,
-        headers,
-        request_body,
-        response_body,
-        response_status,
-    ):
+        method: str,
+        url: str,
+        headers: MutableMapping[str, Any],
+        request_body: Optional[dict[str, Any]],
+        response_body: dict[str, Any],
+        response_status: int,
+    ) -> None:
         logger.info(
             "Request Method: %s\n"
             "Request URL: %s\n"
@@ -103,7 +106,7 @@ class GitHubClient:
             response_status,
         )
 
-    def make_request(self, method: str, endpoint: str, **kwargs) -> GitHubResponse:
+    def make_request(self, method: str, endpoint: str, **kwargs: Any) -> GitHubResponse:
         """Make a request to the GitHub API.
 
         Args:
@@ -131,7 +134,7 @@ class GitHubClient:
             method,
             url,
             self.session.headers,
-            response.request.body,
+            json.loads(response.request.body) if response.request.body else None,
             github_response.content,
             github_response.status_code,
         )
