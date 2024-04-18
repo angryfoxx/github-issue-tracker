@@ -1,11 +1,7 @@
-from typing import Optional
+from rest_framework.generics import get_object_or_404
 
-from gissues.extensions.github.dataclasses import (
-    CommentsDataclass,
-    IssueCommentBodyDataclass,
-    IssueDataclass,
-    RepositoryDataclass,
-)
+from gissues.extensions.github.dataclasses import CommentsDataclass, IssueDataclass, RepositoryDataclass
+from gissues.extensions.github.models import Issue, Repository
 
 
 def transform_repository(repository: dict) -> RepositoryDataclass:
@@ -29,19 +25,23 @@ def transform_repository(repository: dict) -> RepositoryDataclass:
     )
 
 
-def transform_issue(issue: dict, repository: Optional[RepositoryDataclass] = None) -> IssueDataclass:
+def transform_issue(issue: dict, repository_name: str) -> IssueDataclass:
     """Transforms a GitHub issue to a dictionary with the required fields.
 
     Args:
         issue (dict): The GitHub issue to transform.
-        repository (Optional[RepositoryDataclass], optional): The repository where the issue belongs. Defaults to None.
+        repository_name (str): The repository name where the issue belongs.
 
     Returns:
         IssueDataclass: The transformed GitHub issue.
     """
+
+    repository = get_object_or_404(Repository, name=repository_name)
+
     return IssueDataclass(
         title=issue["title"],
         number=issue["number"],
+        body=issue["body"],
         is_closed=issue["state"] == "closed",
         closed_at=issue["closed_at"],
         state_reason=issue["state_reason"],
@@ -53,23 +53,23 @@ def transform_issue(issue: dict, repository: Optional[RepositoryDataclass] = Non
     )
 
 
-def transform_comments(comment: dict, issue: Optional[IssueDataclass] = None) -> IssueCommentBodyDataclass:
+def transform_comments(comment: dict, issue_number: int) -> CommentsDataclass:
     """Transforms a GitHub comment to a dictionary with the required fields.
 
     Args:
         comment (dict): The GitHub comment to transform.
-        issue (Optional[IssueDataclass], optional): The issue where the comment belongs. Defaults to None.
+        issue_number (int): The issue number where the comment belongs.
 
     Returns:
         IssueCommentBodyDataclass: The transformed GitHub comment.
     """
-    return IssueCommentBodyDataclass(
+
+    issue = get_object_or_404(Issue, number=issue_number)
+
+    return CommentsDataclass(
+        comment_id=comment["id"],
         body=comment["body"],
         issue=issue,
-        comment=CommentsDataclass(
-            comment_id=comment["id"],
-            issue=issue,
-            created_at=comment["created_at"],
-            updated_at=comment["updated_at"],
-        ),
+        created_at=comment["created_at"],
+        updated_at=comment["updated_at"],
     )

@@ -1,12 +1,17 @@
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from datetime import datetime
-from typing import Optional
 
-from gissues.extensions.github.models import Issue
+from gissues.extensions.github.models import Issue, Repository
 
 
 @dataclass
-class RepositoryDataclass:
+class BaseDataclass:
+    def dict(self):
+        return {k: v for k, v in asdict(self).items() if v is not None}
+
+
+@dataclass
+class RepositoryDataclass(BaseDataclass):
     name: str
     owner_name: str
     description: str
@@ -18,29 +23,24 @@ class RepositoryDataclass:
 
 
 @dataclass
-class IssueDataclass:
+class IssueDataclass(BaseDataclass):
     title: str
     number: int
+    body: str
     is_closed: bool
     closed_at: datetime
     state_reason: Issue.StateReason
     is_locked: bool
     lock_reason: Issue.LockReason
-    repository: Optional[RepositoryDataclass]
+    repository: RepositoryDataclass | Repository
     created_at: datetime
     updated_at: datetime
 
 
 @dataclass
-class CommentsDataclass:
+class CommentsDataclass(BaseDataclass):
     comment_id: int
-    issue: IssueDataclass
+    body: str
+    issue: IssueDataclass | Issue
     created_at: datetime
     updated_at: datetime
-
-
-@dataclass
-class IssueCommentBodyDataclass:
-    body: str
-    issue: Optional[IssueDataclass]
-    comment: Optional[CommentsDataclass]
