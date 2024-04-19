@@ -18,9 +18,9 @@ class RepositoryDataclass(BaseDataclass):
     description: str
     is_private: bool
     is_fork: bool
-    created_at: datetime
-    updated_at: datetime
-    pushed_at: datetime
+    created_at: str
+    updated_at: str
+    pushed_at: str
 
 
 @dataclass
@@ -35,8 +35,8 @@ class IssueDataclass(BaseDataclass):
     lock_reason: Issue.LockReason
     repository: RepositoryDataclass | Repository
     comment_count: int
-    created_at: datetime
-    updated_at: datetime
+    created_at: str
+    updated_at: str
 
 
 @dataclass
@@ -44,5 +44,5 @@ class CommentsDataclass(BaseDataclass):
     comment_id: int
     body: str
     issue: IssueDataclass | Issue
-    created_at: datetime
-    updated_at: datetime
+    created_at: str
+    updated_at: str
