@@ -13,7 +13,7 @@ def test_UserRepositoryFollowViewSet_list(api_client, user, repository_factory, 
     api_client.force_authenticate(user=user)
 
     response = api_client.get(
-        reverse("following-repositories-list"),
+        reverse("api:following-repositories-list"),
     )
 
     assert response.status_code == 200
