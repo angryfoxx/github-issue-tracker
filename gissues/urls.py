@@ -4,7 +4,10 @@ from django.urls import URLPattern, URLResolver, include, path
 
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
+from gissues.extensions.utils import APIRootView
+
 api_urls: list[URLPattern | URLResolver] = [
+    path("", APIRootView.as_view(), name="api-root"),
     path("", include("gissues.extensions.rest_framework.urls")),
     path("", include("gissues.extensions.auth.urls")),
     path("", include("gissues.extensions.github.urls")),
