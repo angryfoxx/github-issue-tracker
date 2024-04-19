@@ -38,7 +38,7 @@ pytest-xdist = "^3.5.0"
 [tool.ruff]
 fix = true
 show-fixes = true
-target-version = "py312"
+target-version = "py311"
 line-length = 120
 exclude = ["migrations"]
 

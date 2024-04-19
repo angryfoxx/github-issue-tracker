@@ -6,27 +6,31 @@ on:
   pull_request:
     branches: [ "main" ]
 
+
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v3
+      with:
+        python-version: "3.12"
 
-    - name: Expose GitHub Runtime
-      uses: crazy-max/ghaction-github-runtime@v2
-
-    - name: Build containers
+    - name: Install dependencies
       run: |
-        docker buildx create --use --driver=docker-container
-        cd docker
-        docker buildx bake -f docker-compose.yml --set *.cache-to="type=gha,mode=min" --set *.cache-from="type=gha" --load
+        python -m pip install --upgrade pip
+        pip install pytest-xdist ruff
+        pip install -r requirements.txt
 
-    - name: Run tests
-      run: >-
-        docker compose -f docker/docker-compose.yml run --rm web
-        /bin/sh -c
-        "pytest --cov=. --cov-report=xml --cov-report=term-missing --ds=gissues.tests.settings --numprocesses=4 --shuffle --timing"
+    - name: Test with pytest
+      run: |
+        pytest --cov=gissues --cov-report=html --junitxml=test-reports/junit.xml --ds=gissues.tests.settings --numprocesses=auto
+
+    - name: Lint with ruff
+      run: |
+        ruff . --exclude=migrations
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
