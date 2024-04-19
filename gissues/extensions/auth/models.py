@@ -33,6 +33,9 @@ class UserRepositoryFollow(models.Model):
     user = models.ForeignKey(User, related_name="repositories_followed", on_delete=models.CASCADE)
     repository = models.ForeignKey("github.Repository", related_name="followers", on_delete=models.CASCADE)
 
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
     class Meta:
         verbose_name = "User repository follow"
         verbose_name_plural = "User repository follows"
