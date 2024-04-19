@@ -161,3 +161,4 @@ cython_debug/
 volume/
 test-reports/
 junit.xml
+docker/docker-compose.local.yml
