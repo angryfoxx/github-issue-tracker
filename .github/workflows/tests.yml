@@ -1,0 +1,35 @@
+name: Run tests
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Expose GitHub Runtime
+      uses: crazy-max/ghaction-github-runtime@v2
+
+    - name: Build containers
+      run: |
+        docker buildx create --use --driver=docker-container
+        cd docker
+        docker buildx bake -f docker-compose.yml --set *.cache-to="type=gha,mode=min" --set *.cache-from="type=gha" --load
+
+    - name: Run tests
+      run: >-
+        docker compose -f docker/docker-compose.yml run --rm web
+        /bin/sh -c
+        "pytest --cov=. --cov-report=xml --cov-report=term-missing --ds=gissues.tests.settings --numprocesses=4 --shuffle --timing"
+
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4.0.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: angryfoxx/github-issue-tracker
