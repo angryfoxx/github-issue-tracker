@@ -23,6 +23,7 @@ class RepositoryViewSet(GitHubClientViewSet):
     lookup_field = "name"
     lookup_url_kwarg = "repository_name"
     ordering = ["name"]
+    http_method_names = ["head", "options", "get", "post"]
 
     def get_queryset(self) -> QuerySet[Repository]:
         qs = super().get_queryset()
@@ -65,6 +66,7 @@ class IssueViewSet(GitHubClientViewSet):
     lookup_field = "number"
     lookup_url_kwarg = "issue_number"
     ordering = ["number"]
+    http_method_names = ["head", "options", "get"]
 
     def get_queryset(self) -> QuerySet[Issue]:
         qs = super().get_queryset()
@@ -95,6 +97,7 @@ class CommentsViewSet(GitHubClientViewSet):
     lookup_field = "comment_id"
     lookup_url_kwarg = "comment_id"
     ordering = ["created_at"]
+    http_method_names = ["head", "options", "get"]
 
     def get_queryset(self) -> QuerySet[Comments]:
         qs = super().get_queryset()

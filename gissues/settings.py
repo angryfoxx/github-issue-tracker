@@ -206,6 +206,17 @@ if IS_LOCAL_ENV:
 
 REST_FRAMEWORK = {
     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",
+    "DEFAULT_VERSION": "alpha",
+    "ALLOWED_VERSIONS": ["alpha"],
+    "TEST_REQUEST_DEFAULT_FORMAT": "json",
+    "TEST_REQUEST_RENDERER_CLASSES": (
+        "rest_framework.renderers.MultiPartRenderer",
+        "rest_framework.renderers.JSONRenderer",
+    ),
+    "DEFAULT_PARSER_CLASSES": (
+        "rest_framework.parsers.JSONParser",
+        "rest_framework.parsers.MultiPartParser",
+    ),
     "DEFAULT_AUTHENTICATION_CLASSES": DEFAULT_AUTHENTICATION_CLASSES,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_RENDERER_CLASSES": DEFAULT_RENDERER_CLASSES,
@@ -214,6 +225,7 @@ REST_FRAMEWORK = {
 
 
 SPECTACULAR_SETTINGS = {
+    "VERSION": None,
     "TITLE": "Gissues API",
     "DESCRIPTION": "API to follow Issues, Repositories on Github",
     "EXTERNAL_DOCS": {
@@ -228,3 +240,7 @@ CHECK_FOR_NEW_ISSUES_INTERVAL_IN_MINUTES = env.int("CHECK_FOR_NEW_ISSUES_INTERVA
 EMAIL_BACKEND = env.str("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
 EMAIL_HOST = env.str("EMAIL_HOST", "localhost")
 EMAIL_PORT = env.int("EMAIL_PORT", 25)
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 7  # 1 week
+SESSION_COOKIE_SECURE = False

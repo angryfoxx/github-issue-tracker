@@ -18,6 +18,7 @@ class UserRepositoryFollowViewSet(mixins.ListModelMixin, GenericViewSet):
     pagination_class = pagination_factory(page_size=10)
     filter_backends = [OrderingFilter]
     ordering = ["id"]
+    http_method_names = ["head", "options", "get"]
 
     def get_queryset(self) -> QuerySet[Repository]:
         request_user: AbstractBaseUser = self.request.user
