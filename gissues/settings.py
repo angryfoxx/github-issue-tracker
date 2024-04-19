@@ -224,3 +224,7 @@ SPECTACULAR_SETTINGS = {
 }
 
 CHECK_FOR_NEW_ISSUES_INTERVAL_IN_MINUTES = env.int("CHECK_FOR_NEW_ISSUES_INTERVAL_IN_MINUTES", 60)  # DEFAULT: 1 hour
+
+EMAIL_BACKEND = env.str("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = env.str("EMAIL_HOST", "localhost")
+EMAIL_PORT = env.int("EMAIL_PORT", 25)

@@ -1,6 +1,7 @@
 import datetime
 import logging
-from time import sleep
+
+from django.core.mail import send_mail
 
 from gissues.celery import app
 from gissues.extensions.github.models import Comments, Issue, Repository
@@ -11,9 +12,13 @@ logger = logging.getLogger(__name__)
 
 
 @app.task
-def send_email(email: str, subject: str, message: str):
-    sleep(5)
-    print(f"Sending email to {email} with subject {subject} and message {message}")
+def send_email(subject: str, message: str, user_email: str) -> None:
+    send_mail(
+        subject,
+        message,
+        "gissues@localhost.com",
+        [user_email],
+    )
     return None
 
 
@@ -49,7 +54,7 @@ def CommentAdapterTask(owner: str, repository_name: str, issue_number: int | str
 
 
 @app.task
-def IssueAdapterTask(owner_name: str, repository_name: str, following_date: datetime.datetime):
+def IssueAdapterTask(owner_name: str, repository_name: str, following_date: datetime.datetime, user_email: str) -> None:
     issue_response = github_client.issues.list(owner_name, repository_name)
 
     if not issue_response.is_ok:
@@ -81,9 +86,16 @@ def IssueAdapterTask(owner_name: str, repository_name: str, following_date: date
             if converted_created_at > following_date or converted_updated_at > following_date:
                 send_email.apply_async(
                     args=(
-                        "test",
-                        "New Issue",
-                        f"New issue created in {owner_name}/{repository_name} with number {issue['number']}",
+                        f"New Issue Notification on {owner_name}/{repository_name}",
+                        "Hello,\n\n"
+                        "A new issue has been created or updated in one of the repositories you're following.\n"
+                        "Please check it out for more details.\n\n"
+                        f"Repository: {owner_name}/{repository_name}\n"
+                        f"Title: {transformed_data.title}\n"
+                        f"Issue Number: {transformed_data.number}\n\n"
+                        "Best regards,\n"
+                        "Github Issues Tracker Team",
+                        user_email,
                     ),
                 )
 
@@ -109,14 +121,14 @@ def IssueAdapterTask(owner_name: str, repository_name: str, following_date: date
 
 
 @app.task(name="gissues.extensions.github_client.tasks.CheckForNewIssues")
-def CheckForNewIssues():
+def CheckForNewIssues() -> None:
     repositories = Repository.objects.filter(
         followers__isnull=False,
-    ).values_list("owner_name", "name", "followers__created_at")
+    ).values_list("owner_name", "name", "followers__created_at", "followers__user__email")
 
-    for owner_name, repository_name, following_date in repositories:
+    for owner_name, repository_name, following_date, user_email in repositories:
         IssueAdapterTask.apply_async(
-            args=(owner_name, repository_name, following_date),
+            args=(owner_name, repository_name, following_date, user_email),
         )
 
     return None

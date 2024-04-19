@@ -30,6 +30,9 @@ services:
       - "8000:8000"
     depends_on:
       - db
+      - mailhog
+    links:
+      - mailhog
   redis:
     container_name: gissues-redis
     image: redis:6.2.6-alpine
@@ -80,3 +83,9 @@ services:
     depends_on:
       - celery-worker
       - redis
+  mailhog:
+    container_name: gissues-mailhog
+    image: mailhog/mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
