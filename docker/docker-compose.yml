@@ -7,20 +7,20 @@ services:
     user: postgres
     ports:
       - "5432:5432"
-    env_file: ../.env
+    env_file: ../.env.sample
     volumes:
       - ./../volume/db:/var/lib/postgresql/data
   db-eventstream:
     container_name: gissues-postgres-eventstream
     image: postgres:15
     user: postgres
-    env_file: ../.env
+    env_file: ../.env.sample
   web:
     container_name: gissues-web
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    env_file: ../.env
+    env_file: ../.env.sample
     environment:
       DJANGO_CONTEXT: web
     command: python manage.py runserver 0.0.0.0:8000
@@ -42,7 +42,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    env_file: ../.env
+    env_file: ../.env.sample
     environment:
       DJANGO_CONTEXT: celery
     command: celery -A gissues worker -l info
@@ -57,7 +57,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    env_file: ../.env
+    env_file: ../.env.sample
     environment:
       DJANGO_CONTEXT: celery
     command: celery -A gissues beat -l info
@@ -72,7 +72,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    env_file: ../.env
+    env_file: ../.env.sample
     environment:
       DJANGO_CONTEXT: celery
     command: celery -A gissues flower
