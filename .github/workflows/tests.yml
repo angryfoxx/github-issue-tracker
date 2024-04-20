@@ -24,15 +24,15 @@ jobs:
 
     - name: Run tests
       run: >-
-        docker compose -f docker/docker-compose.yml run
+        docker compose -f docker/docker-compose.yml run --rm web
         /bin/sh -c
         "pytest --cov=gissues --cov-report=html --junitxml=test-reports/junit.xml --ds=gissues.tests.settings --numprocesses=auto"
 
     - name: Lint with ruff
       run: |
-        bin/sh -c "ruff . --exclude=migrations"
-
-        docker compose -f docker/docker-compose.yml down --volumes --remove-orphans
+        docker compose -f docker/docker-compose.yml run --rm web
+        /bin/sh -c
+        "ruff . --exclude=migrations"
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
