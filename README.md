@@ -73,15 +73,17 @@ To access the Django admin panel, go to [http://localhost:8000/admin](http://loc
 To access the API, go to [http://localhost:8000/api](http://localhost:8000/api).
 You can see the list of all active API endpoints.
 
-### Access the MailHog
-
-To access the MailHog, go to [http://localhost:8025](http://localhost:8025).
-Youcan see the list of all emails that are sent by the project.
-
 ### Docs
 
 To access the API documentation, go to [http://localhost:8000/api/schema/redoc/](http://localhost:8000/api/schema/redoc/).
 And also you can access the Swagger documentation by going to [http://localhost:8000/api/schema/swagger-ui/](http://localhost:8000/api/schema/swagger-ui/).
+
+
+#### Celery and Email
+In every 1 hour, the project checks the repositories you followed and sends an email if there is an issue created or updated. ("gissues.extensions.github_client.tasks.CheckForNewIssues" task is responsible for this.)
+You can change the schedule time by set the 'CHECK_FOR_NEW_ISSUES_INTERVAL_IN_MINUTES' in the `.env` file.'
+Also, you can check the celery tasks by going to [http://localhost:5555](http://localhost:5555).
+And you can see the emails that are sent by the project by going to [http://localhost:8025](http://localhost:8025).
 
 
 ### Makefile command reference
