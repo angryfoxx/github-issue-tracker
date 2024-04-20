@@ -60,7 +60,7 @@ make up
 ### Create superuser
 To create a superuser, run the following command:
 ```shell
-make createsuperuser
+make django createsuperuser
 ```
 This user will be used to login to the Django admin panel and to access the API.
 
