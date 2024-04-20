@@ -21,12 +21,11 @@ stop:
 start:
 	$(COMPOSE_CMD) start
 
-clean:
-	$(COMPOSE_CMD) down --remove-orphans --volumes
-	$(COMPOSE_CMD) rm -f
-
 django:
 	$(COMPOSE_CMD) exec web python3 manage.py $(filter-out $@,$(MAKECMDGOALS))
+
+shell:
+	$(COMPOSE_CMD) exec web python3 manage.py shell_plus
 
 compile-requirements:
 	poetry export -f requirements.txt --output requirements.txt --without-hashes
@@ -37,4 +36,7 @@ test:
 mypy:
 	$(COMPOSE_CMD) exec web mypy gissues/.
 
-.PHONY: build up down logs restart stop start clean compile-requirements django test mypy
+changelog:
+	git cliff -o CHANGELOG.md
+
+.PHONY: build up down logs restart stop start compile-requirements django shell test mypy changelog
