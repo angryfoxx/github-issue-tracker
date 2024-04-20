@@ -369,3 +369,121 @@ def test_CommentsViewSet_retrieve_with_non_existing_comment(mock_detail_client, 
         repository_name=issue.repository.name,
         comment_id="1",
     )
+
+
+@pytest.mark.django_db
+def test_RepositoryViewSet_history(api_client, repository_factory):
+    repo = repository_factory.create(description="This is a new repository.")
+
+    repo.description = "This is a updated repository."
+    repo.save()
+
+    response = api_client.get(
+        reverse("api:repository-history", kwargs={"repository_owner": repo.owner_name, "name": repo.name})
+    )
+
+    assert response.status_code == 200
+    assert response.data == {
+        "original": {
+            "id": repo.id,
+            "name": repo.name,
+            "owner_name": repo.owner_name,
+            "description": repo.description,
+            "is_private": repo.is_private,
+            "is_fork": repo.is_fork,
+            "created_at": datetime.datetime.strftime(repo.created_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
+            "updated_at": datetime.datetime.strftime(repo.updated_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
+            "pushed_at": datetime.datetime.strftime(repo.pushed_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
+        },
+        "history": [
+            {
+                "history_id": repo.history.last().id,
+                "history_date": datetime.datetime.strftime(repo.history.last().history_date, "%Y-%m-%dT%H:%M:%S.%fZ"),
+                "changes": {"description": "This is a new repository."},
+            },
+        ],
+    }
+
+
+@pytest.mark.django_db
+def test_IssueViewSet_history(api_client, issue_factory):
+    issue = issue_factory.create(body="This is a new issue.")
+
+    issue.body = "This is a updated issue."
+    issue.save()
+
+    response = api_client.get(
+        reverse(
+            "api:repository-issues-history",
+            kwargs={
+                "repository_owner": issue.repository.owner_name,
+                "repository_name": issue.repository.name,
+                "number": issue.number,
+            },
+        )
+    )
+
+    assert response.status_code == 200
+    assert response.data == {
+        "original": {
+            "id": issue.id,
+            "title": issue.title,
+            "number": issue.number,
+            "body": issue.body,
+            "is_closed": issue.is_closed,
+            "closed_at": datetime.datetime.strftime(issue.closed_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
+            "state_reason": issue.state_reason,
+            "is_locked": issue.is_locked,
+            "lock_reason": issue.lock_reason,
+            "comment_count": issue.comment_count,
+            "created_at": datetime.datetime.strftime(issue.created_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
+            "updated_at": datetime.datetime.strftime(issue.updated_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
+        },
+        "history": [
+            {
+                "history_id": issue.history.last().id,
+                "history_date": datetime.datetime.strftime(issue.history.last().history_date, "%Y-%m-%dT%H:%M:%S.%fZ"),
+                "changes": {"body": "This is a new issue."},
+            },
+        ],
+    }
+
+
+@pytest.mark.django_db
+def test_CommentsViewSet_history(api_client, comments_factory):
+    comment = comments_factory.create(body="This is a new comment.")
+
+    comment.body = "This is a updated comment."
+    comment.save()
+
+    response = api_client.get(
+        reverse(
+            "api:issue-comments-history",
+            kwargs={
+                "repository_owner": comment.issue.repository.owner_name,
+                "repository_name": comment.issue.repository.name,
+                "issue_number": comment.issue.number,
+                "comment_id": comment.comment_id,
+            },
+        )
+    )
+
+    assert response.status_code == 200
+    assert response.data == {
+        "original": {
+            "id": comment.id,
+            "comment_id": comment.comment_id,
+            "body": comment.body,
+            "created_at": datetime.datetime.strftime(comment.created_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
+            "updated_at": datetime.datetime.strftime(comment.updated_at, "%Y-%m-%dT%H:%M:%S.%fZ"),
+        },
+        "history": [
+            {
+                "history_id": comment.history.last().id,
+                "history_date": datetime.datetime.strftime(
+                    comment.history.last().history_date, "%Y-%m-%dT%H:%M:%S.%fZ"
+                ),
+                "changes": {"body": "This is a new comment."},
+            },
+        ],
+    }

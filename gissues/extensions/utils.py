@@ -68,7 +68,7 @@ class APIRootView(BaseAPIRootView):
             lambda resolver: isinstance(resolver, URLResolver) and resolver.namespace == "api", resolvers
         )
 
-        return self.visit(next(filtered_resolvers))
+        return self.visit(next(filtered_resolvers, None))
 
     def get(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         return Response(self.get_routes())
@@ -78,14 +78,17 @@ class APIRootView(BaseAPIRootView):
         return (
             pattern.replace("(?P<", "{")
             .replace(">[^/.]+)", "}")
-            .replace(">\\w+", "}")
+            .replace(">\\w+)", "}")
             .replace("^", "")
             .replace("$", "")
             .rstrip("/")
         )
 
-    def visit(self, resolver: URLResolver) -> dict[str, tuple[str, str]]:
+    def visit(self, resolver: Optional[URLResolver] = None) -> Optional[dict[str, tuple[str, str]]]:
         values = {}
+        if resolver is None:
+            return values
+
         for entry in resolver.url_patterns:
             if isinstance(entry, URLResolver):
                 values.update(self.visit(entry))
