@@ -39,7 +39,8 @@ To use the GitHub API, you need to create a GitHub API token. You can create a t
 3. Click on Personal access tokens.
 4. Click on Tokens (classic).
 5. Click on Generate new token.
-6. Give a name to the token and select the scopes you need. (In actually you don't need any scope on this project because public repositories are accessible without permissions. But if you want to access private repositories, you need to select the appropriate scopes.)
+6. Give a name to the token and select the scopes you need.
+(In actually you don't need any scope on this project because public repositories are accessible without permissions. But if you want to access private repositories, you need to select the appropriate scopes.)
 7. Click on Generate token.
 8. Copy the token and paste it to the `.env` file as `GITHUB_API_TOKEN`.
 9. Save the `.env` file.
@@ -62,6 +63,7 @@ To create a superuser, run the following command:
 make createsuperuser
 ```
 This user will be used to login to the Django admin panel and to access the API.
+
 You can use that user to login and follow the repositories.
 
 ### Access the Django admin panel
@@ -71,18 +73,26 @@ To access the Django admin panel, go to [http://localhost:8000/admin](http://loc
 ### Access the API
 
 To access the API, go to [http://localhost:8000/api](http://localhost:8000/api).
+
 You can see the list of all active API endpoints.
 
 ### Docs
 
 To access the API documentation, go to [http://localhost:8000/api/schema/redoc/](http://localhost:8000/api/schema/redoc/).
+
 And also you can access the Swagger documentation by going to [http://localhost:8000/api/schema/swagger-ui/](http://localhost:8000/api/schema/swagger-ui/).
 
 
 #### Celery and Email
-In every 1 hour, the project checks the repositories you followed and sends an email if there is an issue created or updated. ("gissues.extensions.github_client.tasks.CheckForNewIssues" task is responsible for this.)
+In every 1 hour, the project checks the repositories you followed and sends an email if there is an issue created or updated.
+
+("gissues.extensions.github_client.tasks.CheckForNewIssues" task is responsible for this.)
+
 You can change the schedule time by set the 'CHECK_FOR_NEW_ISSUES_INTERVAL_IN_MINUTES' in the `.env` file.'
+
+
 Also, you can check the celery tasks by going to [http://localhost:5555](http://localhost:5555).
+
 And you can see the emails that are sent by the project by going to [http://localhost:8025](http://localhost:8025).
 
 
