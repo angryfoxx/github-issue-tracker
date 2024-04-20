@@ -34,11 +34,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Set up Django
+      - name: Set up environment variables from .env
         run: |
-          python manage.py migrate
-          python manage.py collectstatic --noinput
-
+          cp .env.example .env
+          set -a
+          . .env
+          set +a
 
       - name: Test with pytest
         run: |
