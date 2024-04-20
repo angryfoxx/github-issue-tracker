@@ -6,9 +6,8 @@ on:
   pull_request:
     branches: [ "main" ]
 
-
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
     environment: test
     services:
@@ -17,43 +16,33 @@ jobs:
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 3.12
-        uses: actions/setup-python@v3
-        with:
-          python-version: "3.12"
+    - uses: actions/checkout@v4
 
-      - name: Build the docker-compose stack
-        run: docker-compose -f docker/docker-compose.yml up -d
+    - name: Expose GitHub Runtime
+      uses: crazy-max/ghaction-github-runtime@v2
 
-      - name: Check running containers
-        run: docker ps -a
+    - name: Build containers
+      run: |
+        docker buildx create --use --driver=docker-container
+        cd docker
+        docker buildx bake -f docker-compose.yml --set *.cache-to="type=gha,mode=min" --set *.cache-from="type=gha" --load
 
-      - name: Set up a virtual environment for Python 3.12
-        run: |
-          python -m pip install --upgrade virtualenv
-          virtualenv venv
-          source venv/bin/activate
-          which python
+    - name: Run tests
+      run: >-
+        docker compose -f docker/docker-compose.yml run
+        /bin/sh -c
+        "pytest --cov=gissues --cov-report=html --junitxml=test-reports/junit.xml --ds=gissues.tests.settings --numprocesses=auto"
 
-      - name: Install the base dependencies
-        run: |
-          source venv/bin/activate
-          python -m pip install --upgrade pip
-          python -m pip install pytest-django pytest-xdist pytest-cov ruff
-          pip install -r requirements.txt
+    - name: Lint with ruff
+      run: |
+        bin/sh -c "ruff . --exclude=migrations"
 
-      - name: Test with pytest
-        run: |
-          pytest --cov=gissues --cov-report=html --junitxml=test-reports/junit.xml --ds=gissues.tests.settings --numprocesses=auto
+        docker compose -f docker/docker-compose.yml down --volumes --remove-orphans
 
-      - name: Lint with ruff
-        run: |
-          ruff . --exclude=migrations
-
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v4.0.1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
-          slug: angryfoxx/github-issue-tracker
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v4.0.1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
+        slug: angryfoxx/github-issue-tracker
