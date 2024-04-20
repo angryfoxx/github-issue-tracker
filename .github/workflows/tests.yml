@@ -34,6 +34,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Set up Django
+        run: |
+          python manage.py migrate
+          python manage.py collectstatic --noinput
+
+
       - name: Test with pytest
         run: |
           pytest --cov=gissues --cov-report=html --junitxml=test-reports/junit.xml --ds=gissues.tests.settings --numprocesses=auto
