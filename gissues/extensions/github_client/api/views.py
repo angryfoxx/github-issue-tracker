@@ -3,9 +3,12 @@ from typing import Any, Callable, Optional, Union
 from django.db import models
 
 from rest_framework import serializers
+from rest_framework.decorators import action
 from rest_framework.filters import OrderingFilter
+from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from gissues.extensions.github.api.serializers import BaseHistorySerializer
 from gissues.extensions.github_client.client import GitHubResponse
 from gissues.extensions.utils import pagination_factory
 
@@ -57,3 +60,9 @@ class GitHubClientViewSet(ReadOnlyModelViewSet):
         transformed_data = self.transform_function(obj, **transform_kwargs)
 
         return self.model.objects.create(**transformed_data.dict())
+
+    @action(detail=True, methods=["GET"], serializer_class=BaseHistorySerializer)
+    def history(self, request, **kwargs):
+        obj = self.get_object()
+        serializer = self.get_serializer(obj)
+        return Response(serializer.data)
