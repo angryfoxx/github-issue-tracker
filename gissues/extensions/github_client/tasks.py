@@ -3,6 +3,8 @@ import logging
 
 from django.core.mail import send_mail
 
+from simple_history.utils import bulk_create_with_history, bulk_update_with_history
+
 from gissues.celery import app
 from gissues.extensions.github.models import Comments, Issue, Repository
 from gissues.extensions.github.transformers import transform_comments, transform_issue
@@ -32,24 +34,26 @@ def CommentAdapterTask(owner: str, repository_name: str, issue_number: int | str
 
     comments = comment_response.content
 
-    bulk_create = []
+    comments_mapping_with_id = Comments.objects.filter(issue__number=issue_number).in_bulk(field_name="comment_id")
+
+    bulk_create, bulk_update = [], []
     for comment in comments:
         old_comment = Comments.objects.filter(comment_id=comment["id"]).first()
 
         if old_comment is None or old_comment.updated_at.isoformat().replace("+00:00", "Z") != comment["updated_at"]:
             transformed_data = transform_comments(comment, issue_number)
-            bulk_create.append(Comments(**transformed_data.dict()))
 
-    Comments.objects.bulk_create(
-        bulk_create,
-        update_conflicts=True,
-        update_fields=[
-            "body",
-            "created_at",
-            "updated_at",
-        ],
-        unique_fields=["comment_id"],
-    )
+            if transformed_data.comment_id in comments_mapping_with_id:
+                obj = comments_mapping_with_id[transformed_data.comment_id]
+                obj.body = transformed_data.body
+                obj.created_at = transformed_data.created_at
+                obj.updated_at = transformed_data.updated_at
+                bulk_update.append(obj)
+            else:
+                bulk_create.append(Comments(**transformed_data.dict()))
+
+    bulk_create_with_history(bulk_create, Comments, batch_size=1000)
+    bulk_update_with_history(bulk_update, Comments, ["body", "created_at", "updated_at"], batch_size=1000)
     return None
 
 
@@ -63,13 +67,32 @@ def IssueAdapterTask(owner_name: str, repository_name: str, following_date: date
 
     issues = issue_response.content
 
-    bulk_create = []
+    issues_mapping_with_number = Issue.objects.filter(
+        repository__owner_name=owner_name, repository__name=repository_name
+    ).in_bulk(field_name="number")
+
+    bulk_create, bulk_update = [], []
     for issue in issues:
         old_issue = Issue.objects.filter(number=issue["number"]).first()
 
         if old_issue is None or old_issue.updated_at.isoformat().replace("+00:00", "Z") != issue["updated_at"]:
             transformed_data = transform_issue(issue, repository_name, owner_name)
-            bulk_create.append(Issue(**transformed_data.dict()))
+
+            if transformed_data.number in issues_mapping_with_number:
+                obj = issues_mapping_with_number[transformed_data.number]
+                obj.title = transformed_data.title
+                obj.body = transformed_data.body
+                obj.is_closed = transformed_data.is_closed
+                obj.closed_at = transformed_data.closed_at
+                obj.state_reason = transformed_data.state_reason
+                obj.is_locked = transformed_data.is_locked
+                obj.lock_reason = transformed_data.lock_reason
+                obj.comment_count = transformed_data.comment_count
+                obj.created_at = transformed_data.created_at
+                obj.updated_at = transformed_data.updated_at
+                bulk_update.append(obj)
+            else:
+                bulk_create.append(Issue(**transformed_data.dict()))
 
             if transformed_data.comment_count > 0:
                 CommentAdapterTask.apply_async(
@@ -99,10 +122,11 @@ def IssueAdapterTask(owner_name: str, repository_name: str, following_date: date
                     ),
                 )
 
-    Issue.objects.bulk_create(
-        bulk_create,
-        update_conflicts=True,
-        update_fields=[
+    bulk_create_with_history(bulk_create, Issue, batch_size=1000)
+    bulk_update_with_history(
+        bulk_update,
+        Issue,
+        [
             "title",
             "body",
             "is_closed",
@@ -114,9 +138,8 @@ def IssueAdapterTask(owner_name: str, repository_name: str, following_date: date
             "created_at",
             "updated_at",
         ],
-        unique_fields=["number"],
+        batch_size=1000,
     )
-
     return None
 
 
