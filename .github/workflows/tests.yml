@@ -36,9 +36,8 @@ jobs:
 
       - name: Set up environment variables from .env
         run: |
-          cp .env.sample .env
           set -a
-          . .env
+          . .env.sample
           set +a
 
       - name: Test with pytest
