@@ -19,7 +19,7 @@ jobs:
           python-version: "3.12"
 
       - name: Build the docker-compose stack
-        run: docker-compose -f docker-compose.yml up -d
+        run: docker-compose -f docker/docker-compose.yml up -d
 
       - name: Check running containers
         run: docker ps -a
