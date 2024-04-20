@@ -119,3 +119,23 @@ def test_get_object_or_sync_new_object():
     mock_func.assert_called_once_with(number=1)
     viewset.transform_function.assert_called_once_with({"key": "value"})
     viewset.model.objects.create.assert_called_once_with(key="value")
+
+
+def test_get_object_or_sync_invalid_lookup_value():
+    mock_qs = Mock()
+    mock_qs.filter.side_effect = ValueError
+
+    viewset = GitHubClientViewSet()
+    viewset.get_queryset = Mock(return_value=mock_qs)
+    viewset.kwargs = {"number": "invalid"}
+    viewset.lookup_field = "number"
+
+    with pytest.raises(serializers.ValidationError) as exc_info:
+        viewset.get_object_or_sync({"number": "invalid"})
+
+    assert (
+        exc_info.value.args[0]
+        == "Invalid value 'invalid' for number. This field must be a valid type. Please check the URL and try again. If the problem persists, please contact the system administrator or check the API documentation."
+    )
+
+    mock_qs.filter.assert_called_once_with(number="invalid")

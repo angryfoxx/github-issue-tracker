@@ -36,7 +36,7 @@ def test_RepositoryViewSet_retrieve_with_already_existing_repository(api_client,
     repo = repository_factory.create()
 
     response = api_client.get(
-        reverse("api:repository-detail", kwargs={"repository_owner": repo.owner_name, "repository_name": repo.name})
+        reverse("api:repository-detail", kwargs={"repository_owner": repo.owner_name, "name": repo.name})
     )
     assert response.status_code == 200
     assert response.data == {
@@ -72,7 +72,7 @@ def test_RepositoryViewSet_retrieve_with_non_existing_repository(mock_detail_cli
     response = api_client.get(
         reverse(
             "api:repository-detail",
-            kwargs={"repository_owner": "gissues", "repository_name": "gissues"},
+            kwargs={"repository_owner": "gissues", "name": "gissues"},
         )
     )
 
@@ -105,7 +105,7 @@ def test_RepositoryViewSet_follow_with_non_existing_follow(api_client, user_fact
     response = api_client.post(
         reverse(
             "api:repository-follow",
-            kwargs={"repository_owner": repo.owner_name, "repository_name": repo.name},
+            kwargs={"repository_owner": repo.owner_name, "name": repo.name},
         )
     )
 
@@ -129,7 +129,7 @@ def test_RepositoryViewSet_follow_with_existing_follow(
     response = api_client.post(
         reverse(
             "api:repository-follow",
-            kwargs={"repository_owner": repo.owner_name, "repository_name": repo.name},
+            kwargs={"repository_owner": repo.owner_name, "name": repo.name},
         )
     )
 
@@ -150,7 +150,7 @@ def test_RepositoryViewSet_unfollow(api_client, user_factory, repository_factory
     response = api_client.post(
         reverse(
             "api:repository-unfollow",
-            kwargs={"repository_owner": repo.owner_name, "repository_name": repo.name},
+            kwargs={"repository_owner": repo.owner_name, "name": repo.name},
         )
     )
 
@@ -167,7 +167,7 @@ def test_IssueViewSet_list(api_client, issue_factory):
             "api:repository-issues-list",
             kwargs={
                 "repository_owner": issue.repository.owner_name,
-                "repository_repository_name": issue.repository.name,
+                "repository_name": issue.repository.name,
             },
         )
     )
@@ -201,8 +201,8 @@ def test_IssueViewSet_retrieve_with_already_existing_issue(api_client, issue_fac
             "api:repository-issues-detail",
             kwargs={
                 "repository_owner": issue.repository.owner_name,
-                "repository_repository_name": issue.repository.name,
-                "issue_number": issue.number,
+                "repository_name": issue.repository.name,
+                "number": issue.number,
             },
         )
     )
@@ -247,7 +247,7 @@ def test_IssueViewSet_retrieve_with_non_existing_issue(mock_detail_client, api_c
     response = api_client.get(
         reverse(
             "api:repository-issues-detail",
-            kwargs={"repository_owner": repo.owner_name, "repository_repository_name": repo.name, "issue_number": "1"},
+            kwargs={"repository_owner": repo.owner_name, "repository_name": repo.name, "number": "1"},
         )
     )
 
@@ -282,8 +282,8 @@ def test_CommentsViewSet_list(api_client, comments_factory):
             "api:issue-comments-list",
             kwargs={
                 "repository_owner": comment.issue.repository.owner_name,
-                "repository_repository_name": comment.issue.repository.name,
-                "issue_issue_number": comment.issue.number,
+                "repository_name": comment.issue.repository.name,
+                "issue_number": comment.issue.number,
             },
         )
     )
@@ -310,8 +310,8 @@ def test_CommentsViewSet_retrieve_with_already_existing_comment(api_client, comm
             "api:issue-comments-detail",
             kwargs={
                 "repository_owner": comment.issue.repository.owner_name,
-                "repository_repository_name": comment.issue.repository.name,
-                "issue_issue_number": comment.issue.number,
+                "repository_name": comment.issue.repository.name,
+                "issue_number": comment.issue.number,
                 "comment_id": comment.comment_id,
             },
         )
@@ -345,8 +345,8 @@ def test_CommentsViewSet_retrieve_with_non_existing_comment(mock_detail_client, 
             "api:issue-comments-detail",
             kwargs={
                 "repository_owner": issue.repository.owner_name,
-                "repository_repository_name": issue.repository.name,
-                "issue_issue_number": issue.number,
+                "repository_name": issue.repository.name,
+                "issue_number": issue.number,
                 "comment_id": "1",
             },
         )

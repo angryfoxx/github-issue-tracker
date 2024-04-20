@@ -1,6 +1,6 @@
 from django.db.models import QuerySet
 
-from rest_framework import permissions, status
+from rest_framework import permissions, serializers, status
 from rest_framework.decorators import action
 from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
@@ -21,7 +21,6 @@ class RepositoryViewSet(GitHubClientViewSet):
     transform_function = staticmethod(transform_repository)
     client_detail_function = github_client.repositories.detail
     lookup_field = "name"
-    lookup_url_kwarg = "repository_name"
     ordering = ["name"]
     http_method_names = ["head", "options", "get", "post"]
 
@@ -33,26 +32,39 @@ class RepositoryViewSet(GitHubClientViewSet):
         return self.get_object_or_sync(
             {
                 "owner_name": self.kwargs["repository_owner"],
-                "repository_name": self.kwargs["repository_name"],
+                "repository_name": self.kwargs["name"],
             }
         )
 
-    @action(detail=True, methods=["POST"], permission_classes=[permissions.IsAuthenticated])
-    def follow(self, request: Request, repository_owner: str, repository_name: str) -> Response:
+    @action(
+        detail=True,
+        methods=["POST"],
+        permission_classes=[permissions.IsAuthenticated],
+        serializer_class=serializers.Serializer,
+    )
+    def follow(self, request: Request, repository_owner: str, name: str) -> Response:
+        """This action allows a user to follow a repository."""
+
         request_user = request.user
 
         if UserRepositoryFollow.objects.filter(
-            user=request_user, repository__name=repository_name, repository__owner_name=repository_owner
+            user=request_user, repository__name=name, repository__owner_name=repository_owner
         ).exists():
             return Response(status=status.HTTP_200_OK)
 
         UserRepositoryFollow.objects.create(user=request.user, repository=self.get_object())
         return Response(status=status.HTTP_200_OK)
 
-    @action(detail=True, methods=["POST"], permission_classes=[permissions.IsAuthenticated])
-    def unfollow(self, request: Request, repository_owner: str, repository_name: str) -> Response:
+    @action(
+        detail=True,
+        methods=["POST"],
+        permission_classes=[permissions.IsAuthenticated],
+        serializer_class=serializers.Serializer,
+    )
+    def unfollow(self, request: Request, repository_owner: str, name: str) -> Response:
+        """This action allows a user to unfollow a repository."""
         UserRepositoryFollow.objects.filter(
-            user=request.user, repository__name=repository_name, repository__owner_name=repository_owner
+            user=request.user, repository__name=name, repository__owner_name=repository_owner
         ).delete()
         return Response(status=status.HTTP_200_OK)
 
@@ -64,25 +76,24 @@ class IssueViewSet(GitHubClientViewSet):
     transform_function = staticmethod(transform_issue)
     client_detail_function = github_client.issues.detail
     lookup_field = "number"
-    lookup_url_kwarg = "issue_number"
     ordering = ["number"]
-    http_method_names = ["head", "options", "get"]
 
     def get_queryset(self) -> QuerySet[Issue]:
         qs = super().get_queryset()
-        repository = get_object_or_404(
-            Repository, name=self.kwargs["repository_repository_name"], owner_name=self.kwargs["repository_owner"]
+
+        repository = Repository.objects.get(
+            name=self.kwargs["repository_name"], owner_name=self.kwargs["repository_owner"]
         )
         return qs.filter(repository=repository)
 
     def get_object(self) -> Issue:
-        repository_name = self.kwargs["repository_repository_name"]
+        repository_name = self.kwargs["repository_name"]
         owner_name = self.kwargs["repository_owner"]
         return self.get_object_or_sync(
             {
                 "owner_name": owner_name,
                 "repository_name": repository_name,
-                "issue_number": self.kwargs["issue_number"],
+                "issue_number": self.kwargs["number"],
             },
             {"repository_name": repository_name, "owner_name": owner_name},
         )
@@ -95,21 +106,19 @@ class CommentsViewSet(GitHubClientViewSet):
     transform_function = staticmethod(transform_comments)
     client_detail_function = github_client.comments.detail
     lookup_field = "comment_id"
-    lookup_url_kwarg = "comment_id"
     ordering = ["created_at"]
-    http_method_names = ["head", "options", "get"]
 
     def get_queryset(self) -> QuerySet[Comments]:
         qs = super().get_queryset()
-        issue = get_object_or_404(Issue, number=self.kwargs["issue_issue_number"])
+        issue = get_object_or_404(Issue, number=self.kwargs["issue_number"])
         return qs.filter(issue=issue)
 
     def get_object(self) -> Comments:
-        issue_number = self.kwargs["issue_issue_number"]
+        issue_number = self.kwargs["issue_number"]
         return self.get_object_or_sync(
             {
                 "owner_name": self.kwargs["repository_owner"],
-                "repository_name": self.kwargs["repository_repository_name"],
+                "repository_name": self.kwargs["repository_name"],
                 "comment_id": self.kwargs["comment_id"],
             },
             {"issue_number": issue_number},

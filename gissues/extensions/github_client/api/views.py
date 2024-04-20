@@ -17,6 +17,7 @@ class GitHubClientViewSet(ReadOnlyModelViewSet):
     model: models.Model
     transform_function: Callable[[dict[str, Any]], Any]
     client_detail_function: Callable[..., ...]
+    http_method_names = ["head", "options", "get"]
 
     def get_serializer_class(self) -> type[serializers.BaseSerializer[Any]]:
         serializer = self.serializer_classes.get(self.action, self.serializer_class)
@@ -38,8 +39,15 @@ class GitHubClientViewSet(ReadOnlyModelViewSet):
         lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
         lookup_value = self.kwargs[lookup_url_kwarg]
 
-        if obj := qs.filter(**{self.lookup_field: lookup_value}).first():
-            return obj
+        try:
+            if obj := qs.filter(**{self.lookup_field: lookup_value}).first():
+                return obj
+        except ValueError:
+            raise serializers.ValidationError(
+                f"Invalid value '{lookup_value}' for {self.lookup_field}. This field must be a valid type."
+                " Please check the URL and try again."
+                " If the problem persists, please contact the system administrator or check the API documentation."
+            )
 
         obj = self.get_object_from_github(
             **github_client_kwargs,
