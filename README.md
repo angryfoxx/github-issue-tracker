@@ -2,7 +2,7 @@
 A GitHub issue tracker to follow GitHub issues with django and drf
 
 ## Technology Stack
-This is a list of mostly used technologies and libraries that are used in Insurance Portal project:
+This is a list of mostly used technologies and libraries that are used in project:
 
 - [Python](https://www.python.org/) is an interpreted high-level programming language for general-purpose programming.
 
