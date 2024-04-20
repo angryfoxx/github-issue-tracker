@@ -36,7 +36,7 @@ jobs:
 
       - name: Set up environment variables from .env
         run: |
-          cp .env.example .env
+          cp .env.sample .env
           set -a
           . .env
           set +a
