@@ -1,5 +1,5 @@
 # github-issue-tracker
-A GitHub issue tracker to follow GitHub issues with django and drf
+A GitHub issue tracker to follow GitHub issues with django and Django Rest Framework.
 
 ## Technology Stack
 This is a list of mostly used technologies and libraries that are used in project:
