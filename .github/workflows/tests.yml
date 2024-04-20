@@ -1,4 +1,4 @@
-name: Run tests
+name: Django CI
 
 on:
   push:
@@ -7,32 +7,26 @@ on:
     branches: [ "main" ]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
-    environment: test
     steps:
-    - uses: actions/checkout@v4
-
-    - name: Expose GitHub Runtime
-      uses: crazy-max/ghaction-github-runtime@v2
-
-    - name: Build containers
+    - uses: actions/checkout@v3
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.12
+    - name: Install Dependencies
       run: |
-        docker buildx create --use --driver=docker-container
-        cd docker
-        docker buildx bake -f docker-compose.yml --set *.cache-to="type=gha,mode=min" --set *.cache-from="type=gha" --load
-
+        python -m pip install --upgrade pip
+        pip install pytest-django pytest-xdist ruff
+        pip install -r requirements.txt
     - name: Run tests
       run: >-
-        docker compose -f docker/docker-compose.yml run --rm web
-        /bin/sh -c
-        "pytest --cov=gissues --cov-report=html --junitxml=test-reports/junit.xml --ds=gissues.tests.settings --numprocesses=auto"
+        pytest --cov=gissues --cov-report=html --junitxml=test-reports/junit.xml --ds=gissues.tests.settings --numprocesses=auto
 
     - name: Lint with ruff
       run: |
-        docker compose -f docker/docker-compose.yml run --rm web
-        /bin/sh -c
-        "ruff . --exclude=migrations"
+        ruff . --exclude=migrations
 
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v4.0.1
