@@ -61,7 +61,7 @@ python_files = ["test_*.py", "*_test.py", "tests.py"]
 addopts = ["--cov=gissues", "--cov-report=term-missing", "--cov-report=html", "--junitxml=test-reports/junit.xml", "--ds=gissues.tests.settings", "--numprocesses=auto"]
 
 [tool.coverage.report]
-omit = ["*migrations*", "*tests*", "asgi.py", "wsgi.py", "manage.py", "*urls*"]
+omit = ["*migrations*", "*tests*", "asgi.py", "wsgi.py", "manage.py", "*urls*", "settings.py"]
 
 [tool.black]
 line-length = 120
