@@ -95,3 +95,66 @@ def test_get_routes_no_patterns(api_root_view):
 )
 def test_convert_pattern_to_human_readable(pattern, expected, api_root_view):
     assert api_root_view.convert_pattern_to_human_readable(pattern) == expected
+
+
+def test_visit_resolver_is_none(api_root_view):
+    assert api_root_view.visit() == {}
+
+
+def test_visit_with_api_root_resolver(api_root_view):
+    mock_entry = Mock(spec=URLPattern, pattern=Mock())
+    mock_entry.name = "api-root"
+    resolver = Mock(spec=URLResolver, url_patterns=[mock_entry])
+
+    result = api_root_view.visit(resolver)
+
+    assert result == {}
+
+
+@patch("gissues.extensions.utils.APIRootView.convert_pattern_to_human_readable")
+@patch("gissues.extensions.utils.APIRootView.resolve_url")
+def test_visit_with_url_pattern(mock_resolve_url, mock_convert_pattern_to_human_readable, api_root_view):
+    mock_entry = Mock(spec=URLPattern, pattern=Mock())
+    mock_entry.name = "test-pattern"
+    mock_resolve_url.return_value = "http://test.com"
+    mock_convert_pattern_to_human_readable.return_value = "test"
+
+    resolver = Mock(spec=URLResolver, url_patterns=[mock_entry])
+    resolver.url_patterns = [mock_entry]
+    resolver.namespace = "api"
+
+    result = api_root_view.visit(resolver)
+
+    assert result == {"test-pattern": ("test", "http://test.com")}
+
+    mock_resolve_url.assert_called_once_with("api", mock_entry)
+    mock_convert_pattern_to_human_readable.assert_called_once_with(str(mock_entry.pattern))
+
+
+@patch("gissues.extensions.utils.APIRootView.convert_pattern_to_human_readable")
+@patch("gissues.extensions.utils.APIRootView.resolve_url")
+def test_visit_with_url_resolver(mock_resolve_url, mock_convert_pattern_to_human_readable, api_root_view):
+    url_pattern = Mock(spec=URLPattern, pattern=Mock())
+    url_pattern.name = "test-pattern2"
+    mock_resolver = Mock(spec=URLResolver, url_patterns=[url_pattern])
+
+    mock_resolve_url.return_value = "http://test.com"
+    mock_convert_pattern_to_human_readable.return_value = "test"
+
+    resolver = Mock(spec=URLResolver, url_patterns=[mock_resolver])
+
+    result = api_root_view.visit(resolver)
+
+    assert result == {"test-pattern2": ("test", "http://test.com")}
+
+    mock_resolve_url.assert_called_once_with("api", mock_resolver.url_patterns[0])
+    mock_convert_pattern_to_human_readable.assert_called_once_with(str(mock_resolver.url_patterns[0].pattern))
+
+
+@patch("gissues.extensions.utils.APIRootView.get_routes")
+def test_api_root_view_get(mock_get_routes, api_root_view):
+    mock_get_routes.return_value = {"test": ("test", "http://test.com")}
+
+    response = api_root_view.get(Mock())
+
+    assert response.data == {"test": ("test", "http://test.com")}
