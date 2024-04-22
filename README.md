@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/angryfoxx/github-issue-tracker/graph/badge.svg?token=GFRY4PXFSZ)](https://codecov.io/gh/angryfoxx/github-issue-tracker)
+
 # github-issue-tracker
 A GitHub issue tracker to follow GitHub issues with django and Django Rest Framework.
 
