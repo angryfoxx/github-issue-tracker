@@ -25,7 +25,7 @@ def send_email(subject: str, message: str, user_email: str) -> None:
 
 
 @app.task
-def CommentAdapterTask(owner: str, repository_name: str, issue_number: int | str):
+def comment_adapter_task(owner: str, repository_name: str, issue_number: int | str):
     comment_response = github_client.comments.list(owner, repository_name, issue_number)
 
     if not comment_response.is_ok:
@@ -38,12 +38,12 @@ def CommentAdapterTask(owner: str, repository_name: str, issue_number: int | str
 
     bulk_create, bulk_update = [], []
     for comment in comments:
-        old_comment = Comments.objects.filter(comment_id=comment["id"]).first()
+        old_comment = comments_mapping_with_id.get(comment["id"])
 
         if old_comment is None or old_comment.updated_at.isoformat().replace("+00:00", "Z") != comment["updated_at"]:
             transformed_data = transform_comments(comment, issue_number)
 
-            if transformed_data.comment_id in comments_mapping_with_id:
+            if old_comment:
                 obj = comments_mapping_with_id[transformed_data.comment_id]
                 obj.body = transformed_data.body
                 obj.created_at = transformed_data.created_at
@@ -58,7 +58,9 @@ def CommentAdapterTask(owner: str, repository_name: str, issue_number: int | str
 
 
 @app.task
-def IssueAdapterTask(owner_name: str, repository_name: str, following_date: datetime.datetime, user_email: str) -> None:
+def issue_adapter_task(
+    owner_name: str, repository_name: str, following_date: datetime.datetime, user_email: str
+) -> None:
     issue_response = github_client.issues.list(owner_name, repository_name)
 
     if not issue_response.is_ok:
@@ -73,12 +75,12 @@ def IssueAdapterTask(owner_name: str, repository_name: str, following_date: date
 
     bulk_create, bulk_update = [], []
     for issue in issues:
-        old_issue = Issue.objects.filter(number=issue["number"]).first()
+        old_issue = issues_mapping_with_number.get(issue["number"])
 
-        if old_issue is None or old_issue.updated_at.isoformat().replace("+00:00", "Z") != issue["updated_at"]:
+        if old_issue or old_issue.updated_at.isoformat().replace("+00:00", "Z") != issue["updated_at"]:
             transformed_data = transform_issue(issue, repository_name, owner_name)
 
-            if transformed_data.number in issues_mapping_with_number:
+            if old_issue:
                 obj = issues_mapping_with_number[transformed_data.number]
                 obj.title = transformed_data.title
                 obj.body = transformed_data.body
@@ -95,7 +97,7 @@ def IssueAdapterTask(owner_name: str, repository_name: str, following_date: date
                 bulk_create.append(Issue(**transformed_data.dict()))
 
             if transformed_data.comment_count > 0:
-                CommentAdapterTask.apply_async(
+                comment_adapter_task.apply_async(
                     args=(owner_name, repository_name, issue["number"]),
                 )
 
@@ -143,14 +145,18 @@ def IssueAdapterTask(owner_name: str, repository_name: str, following_date: date
     return None
 
 
-@app.task(name="gissues.extensions.github_client.tasks.CheckForNewIssues")
-def CheckForNewIssues() -> None:
-    repositories = Repository.objects.filter(
-        followers__isnull=False,
-    ).values_list("owner_name", "name", "followers__created_at", "followers__user__email")
+@app.task(name="gissues.extensions.github_client.tasks.check_for_new_issues")
+def check_for_new_issues() -> None:
+    repositories = (
+        Repository.objects.filter(
+            followers__isnull=False,
+        )
+        .prefetch_related("followers", "followers__user")
+        .values_list("owner_name", "name", "followers__created_at", "followers__user__email")
+    )
 
     for owner_name, repository_name, following_date, user_email in repositories:
-        IssueAdapterTask.apply_async(
+        issue_adapter_task.apply_async(
             args=(owner_name, repository_name, following_date, user_email),
         )
 

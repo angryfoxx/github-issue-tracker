@@ -11,7 +11,7 @@ app.config_from_object("django.conf:settings", namespace="CELERY")
 
 ISSUE_SCHEDULE = {
     "issue-system": {
-        "task": "gissues.extensions.github_client.tasks.CheckForNewIssues",
+        "task": "gissues.extensions.github_client.tasks.check_for_new_issues",
         "schedule": timezone.timedelta(minutes=settings.CHECK_FOR_NEW_ISSUES_INTERVAL_IN_MINUTES),
     },
 }

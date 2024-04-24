@@ -13,7 +13,7 @@ from gissues.extensions.github_client.client import GitHubResponse
 from gissues.extensions.utils import pagination_factory
 
 
-class GitHubClientViewSet(ReadOnlyModelViewSet):
+class BaseGitHubClientViewSet(ReadOnlyModelViewSet):
     serializer_classes: dict[str, type[serializers.BaseSerializer[Any]]] = {}
     pagination_class = pagination_factory(page_size=10)
     filter_backends = [OrderingFilter]
@@ -28,6 +28,11 @@ class GitHubClientViewSet(ReadOnlyModelViewSet):
         return serializer
 
     def get_object_from_github(self, **kwargs: Any) -> Union[dict[str, Any], Any]:
+        if not hasattr(self, "client_detail_function"):
+            raise NotImplementedError(
+                "You must define a 'client_detail_function' method in your viewset to use the 'get_object_from_github' method."
+            )
+
         obj: GitHubResponse = self.client_detail_function(**kwargs)
         if not obj.is_ok:
             raise obj.exception_handler()

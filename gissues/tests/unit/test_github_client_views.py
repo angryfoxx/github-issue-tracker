@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 import pytest
 
-from gissues.extensions.github_client.api.views import GitHubClientViewSet
+from gissues.extensions.github_client.api.views import BaseGitHubClientViewSet
 from gissues.extensions.github_client.client import GitHubResponse
 
 
@@ -24,7 +24,7 @@ class DummyActionSerializer(serializers.Serializer):
     ],
 )
 def test_get_serializer_class(action, expected_serializer):
-    class TestGitHubClientViewSet(GitHubClientViewSet):
+    class TestGitHubClientViewSet(BaseGitHubClientViewSet):
         serializer_classes = {
             "list": DummySerializer,
             "retrieve": DummyActionSerializer,
@@ -39,7 +39,7 @@ def test_get_serializer_class(action, expected_serializer):
 
 
 def test_get_serializer_class_raises_assertion_error():
-    view = GitHubClientViewSet()
+    view = BaseGitHubClientViewSet()
     view.action = "create"
 
     with pytest.raises(AssertionError):
@@ -50,7 +50,7 @@ def test_get_object_from_github():
     mock_response = Mock(spec=GitHubResponse, is_ok=True, content={"key": "value"}, status_code=200)
     mock_func = Mock(return_value=mock_response)
 
-    viewset = GitHubClientViewSet()
+    viewset = BaseGitHubClientViewSet()
     viewset.client_detail_function = mock_func
 
     obj = viewset.get_object_from_github(key="value")
@@ -65,7 +65,7 @@ def test_get_object_from_github_raises_exception():
     mock_response.exception_handler = Mock(side_effect=Exception("Not Found"))
     mock_func = Mock(return_value=mock_response)
 
-    viewset = GitHubClientViewSet()
+    viewset = BaseGitHubClientViewSet()
     viewset.client_detail_function = mock_func
 
     with pytest.raises(Exception) as exc_info:
@@ -80,7 +80,7 @@ def test_get_object_or_sync_existing_object():
     mock_qs = Mock()
     mock_qs.filter.return_value.first.return_value = "existing_object"
 
-    viewset = GitHubClientViewSet()
+    viewset = BaseGitHubClientViewSet()
     viewset.get_queryset = Mock(return_value=mock_qs)
     viewset.kwargs = {"number": 1}
     viewset.lookup_field = "number"
@@ -100,7 +100,7 @@ def test_get_object_or_sync_new_object():
     mock_response = Mock(spec=GitHubResponse, is_ok=True, content={"key": "value"}, status_code=200)
     mock_func = Mock(return_value=mock_response)
 
-    viewset = GitHubClientViewSet()
+    viewset = BaseGitHubClientViewSet()
     viewset.get_queryset = Mock(return_value=mock_qs)
     viewset.client_detail_function = mock_func
     viewset.model = Mock()
@@ -125,7 +125,7 @@ def test_get_object_or_sync_invalid_lookup_value():
     mock_qs = Mock()
     mock_qs.filter.side_effect = ValueError
 
-    viewset = GitHubClientViewSet()
+    viewset = BaseGitHubClientViewSet()
     viewset.get_queryset = Mock(return_value=mock_qs)
     viewset.kwargs = {"number": "invalid"}
     viewset.lookup_field = "number"
@@ -139,3 +139,15 @@ def test_get_object_or_sync_invalid_lookup_value():
     )
 
     mock_qs.filter.assert_called_once_with(number="invalid")
+
+
+def test_get_object_from_github_not_implemented():
+    viewset = BaseGitHubClientViewSet()
+
+    with pytest.raises(NotImplementedError) as exc_info:
+        viewset.get_object_from_github()
+
+    assert (
+        str(exc_info.value)
+        == "You must define a 'client_detail_function' method in your viewset to use the 'get_object_from_github' method."
+    )

@@ -9,7 +9,7 @@ from gissues.extensions.github_client.client import GitHubResponse
 
 
 @pytest.mark.django_db
-def test_RepositoryViewSet_list(api_client, repository_factory):
+def test_repository_view_set_list(api_client, repository_factory):
     repo = repository_factory.create()
 
     response = api_client.get(reverse("api:repository-list", kwargs={"repository_owner": repo.owner_name}))
@@ -32,7 +32,7 @@ def test_RepositoryViewSet_list(api_client, repository_factory):
 
 
 @pytest.mark.django_db
-def test_RepositoryViewSet_retrieve_with_already_existing_repository(api_client, repository_factory):
+def test_repository_view_set_retrieve_with_already_existing_repository(api_client, repository_factory):
     repo = repository_factory.create()
 
     response = api_client.get(
@@ -54,7 +54,7 @@ def test_RepositoryViewSet_retrieve_with_already_existing_repository(api_client,
 
 @patch("gissues.extensions.github.api.views.RepositoryViewSet.client_detail_function")
 @pytest.mark.django_db
-def test_RepositoryViewSet_retrieve_with_non_existing_repository(mock_detail_client, api_client):
+def test_repository_view_set_retrieve_with_non_existing_repository(mock_detail_client, api_client):
     repo = {
         "name": "gissues",
         "owner": {"login": "gissues"},
@@ -96,7 +96,7 @@ def test_RepositoryViewSet_retrieve_with_non_existing_repository(mock_detail_cli
 
 
 @pytest.mark.django_db
-def test_RepositoryViewSet_follow_with_non_existing_follow(api_client, user_factory, repository_factory):
+def test_repository_view_set_follow_with_non_existing_follow(api_client, user_factory, repository_factory):
     user = user_factory.create()
     repo = repository_factory.create()
 
@@ -115,7 +115,7 @@ def test_RepositoryViewSet_follow_with_non_existing_follow(api_client, user_fact
 
 
 @pytest.mark.django_db
-def test_RepositoryViewSet_follow_with_existing_follow(
+def test_repository_view_set_follow_with_existing_follow(
     api_client, user_factory, repository_factory, user_repository_follow_factory
 ):
     user = user_factory.create()
@@ -138,7 +138,7 @@ def test_RepositoryViewSet_follow_with_existing_follow(
 
 
 @pytest.mark.django_db
-def test_RepositoryViewSet_unfollow(api_client, user_factory, repository_factory, user_repository_follow_factory):
+def test_repository_view_set_unfollow(api_client, user_factory, repository_factory, user_repository_follow_factory):
     user = user_factory.create()
     repo = repository_factory.create()
     user_repository_follow_factory.create(user=user, repository=repo)
@@ -159,7 +159,7 @@ def test_RepositoryViewSet_unfollow(api_client, user_factory, repository_factory
 
 
 @pytest.mark.django_db
-def test_IssueViewSet_list(api_client, issue_factory):
+def test_issue_view_set_list(api_client, issue_factory):
     issue = issue_factory.create()
 
     response = api_client.get(
@@ -193,7 +193,7 @@ def test_IssueViewSet_list(api_client, issue_factory):
 
 
 @pytest.mark.django_db
-def test_IssueViewSet_retrieve_with_already_existing_issue(api_client, issue_factory):
+def test_issue_view_set_retrieve_with_already_existing_issue(api_client, issue_factory):
     issue = issue_factory.create()
 
     response = api_client.get(
@@ -225,7 +225,7 @@ def test_IssueViewSet_retrieve_with_already_existing_issue(api_client, issue_fac
 
 @patch("gissues.extensions.github.api.views.IssueViewSet.client_detail_function")
 @pytest.mark.django_db
-def test_IssueViewSet_retrieve_with_non_existing_issue(mock_detail_client, api_client, repository_factory):
+def test_issue_view_set_retrieve_with_non_existing_issue(mock_detail_client, api_client, repository_factory):
     repo = repository_factory.create()
     issue = {
         "title": "Add a new feature",
@@ -274,7 +274,7 @@ def test_IssueViewSet_retrieve_with_non_existing_issue(mock_detail_client, api_c
 
 
 @pytest.mark.django_db
-def test_CommentsViewSet_list(api_client, comments_factory):
+def test_comments_view_set_list(api_client, comments_factory):
     comment = comments_factory.create()
 
     response = api_client.get(
@@ -302,7 +302,7 @@ def test_CommentsViewSet_list(api_client, comments_factory):
 
 
 @pytest.mark.django_db
-def test_CommentsViewSet_retrieve_with_already_existing_comment(api_client, comments_factory):
+def test_comments_view_set_retrieve_with_already_existing_comment(api_client, comments_factory):
     comment = comments_factory.create()
 
     response = api_client.get(
@@ -328,7 +328,7 @@ def test_CommentsViewSet_retrieve_with_already_existing_comment(api_client, comm
 
 @patch("gissues.extensions.github.api.views.CommentsViewSet.client_detail_function")
 @pytest.mark.django_db
-def test_CommentsViewSet_retrieve_with_non_existing_comment(mock_detail_client, api_client, issue_factory):
+def test_comments_view_set_retrieve_with_non_existing_comment(mock_detail_client, api_client, issue_factory):
     issue = issue_factory.create()
     comment_data = {
         "id": 1,
@@ -372,7 +372,7 @@ def test_CommentsViewSet_retrieve_with_non_existing_comment(mock_detail_client, 
 
 
 @pytest.mark.django_db
-def test_RepositoryViewSet_history(api_client, repository_factory):
+def test_repository_view_set_history(api_client, repository_factory):
     repo = repository_factory.create(description="This is a new repository.")
 
     repo.description = "This is a updated repository."
@@ -406,7 +406,7 @@ def test_RepositoryViewSet_history(api_client, repository_factory):
 
 
 @pytest.mark.django_db
-def test_IssueViewSet_history(api_client, issue_factory):
+def test_issue_view_set_history(api_client, issue_factory):
     issue = issue_factory.create(body="This is a new issue.")
 
     issue.body = "This is a updated issue."
@@ -450,7 +450,7 @@ def test_IssueViewSet_history(api_client, issue_factory):
 
 
 @pytest.mark.django_db
-def test_CommentsViewSet_history(api_client, comments_factory):
+def test_comments_view_set_history(api_client, comments_factory):
     comment = comments_factory.create(body="This is a new comment.")
 
     comment.body = "This is a updated comment."

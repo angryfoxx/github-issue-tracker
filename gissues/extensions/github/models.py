@@ -35,7 +35,7 @@ class Issue(models.Model):
         OTHER = "other", "Other"
 
     title = models.CharField(max_length=256)
-    number = models.PositiveIntegerField(unique=True)
+    number = models.PositiveIntegerField()
     body = models.TextField(max_length=65536)
     # the issue is open and state_reason can be null or reopened when the issue is closed
     is_closed = models.BooleanField(default=False)
@@ -54,6 +54,7 @@ class Issue(models.Model):
     class Meta:
         verbose_name = "issue"
         verbose_name_plural = "issues"
+        constraints = [models.UniqueConstraint(fields=["number", "repository"], name="unique_issue")]
 
     def __str__(self) -> str:
         return self.title

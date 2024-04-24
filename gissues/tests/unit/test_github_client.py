@@ -23,7 +23,7 @@ from gissues.extensions.github_client.client import (
         (500, {"message": "Internal Server Error"}, False),
     ],
 )
-def test_GitHubResponse(status_code, content, is_ok):
+def test_github_response(status_code, content, is_ok):
     response = GitHubResponse(status_code, content, is_ok)
 
     assert response.status_code == status_code
@@ -55,7 +55,7 @@ def test_GitHubResponse(status_code, content, is_ok):
         (status.HTTP_200_OK, {"message": "OK"}, True, AssertionError),
     ],
 )
-def test_GitHubResponse_exception_handler(status_code, content, is_ok, expected_exception):
+def test_github_response_exception_handler(status_code, content, is_ok, expected_exception):
     response = GitHubResponse(status_code, content, is_ok)
 
     with pytest.raises(expected_exception) as exc_info:
@@ -69,7 +69,7 @@ def test_GitHubResponse_exception_handler(status_code, content, is_ok, expected_
         assert exc_info.value.detail == content
 
 
-def test_ServiceUnavailable_exception():
+def test_service_unavailable_exception():
     exception = ServiceUnavailable()
     assert exception.status_code == status.HTTP_503_SERVICE_UNAVAILABLE
     assert exception.default_code == "service_unavailable"
@@ -80,7 +80,7 @@ def test_ServiceUnavailable_exception():
 
 
 @patch("gissues.extensions.github_client.client.requests.Session")
-def test_GitHubClient_session_without_token(mock_session):
+def test_github_client_session_without_token(mock_session):
     mock_session.return_value.headers = {}
 
     client = GitHubClient()
@@ -95,7 +95,7 @@ def test_GitHubClient_session_without_token(mock_session):
 
 
 @patch("gissues.extensions.github_client.client.requests.Session")
-def test_GitHubClient_session_with_token(mock_session):
+def test_github_client_session_with_token(mock_session):
     mock_session.return_value.headers = {}
 
     client = GitHubClient()
@@ -126,13 +126,13 @@ def test_GitHubClient_session_with_token(mock_session):
         ),
     ],
 )
-def test_GitHubClient_mask_secret_info(data, expected_data):
+def test_github_client_mask_secret_info(data, expected_data):
     client = GitHubClient()
     assert client._mask_secret_info(data) == expected_data
 
 
 @patch("gissues.extensions.github_client.client.GitHubClient._mask_secret_info")
-def test_GitHubClient_log_request(mock_mask_secret_info, caplog):
+def test_github_client_log_request(mock_mask_secret_info, caplog):
     mock_mask_secret_info.side_effect = lambda x: x
 
     client = GitHubClient()
@@ -169,7 +169,7 @@ def test_GitHubClient_log_request(mock_mask_secret_info, caplog):
         (ConnectionError, ServiceUnavailable),
     ],
 )
-def test_GitHubClient_make_request_non_succeed_ones(mock_session, mock_session_side_effect, expected_exception):
+def test_github_client_make_request_non_succeed_ones(mock_session, mock_session_side_effect, expected_exception):
     mock_session.request.side_effect = mock_session_side_effect
 
     client = GitHubClient()
@@ -193,7 +193,7 @@ def test_GitHubClient_make_request_non_succeed_ones(mock_session, mock_session_s
         (500, {"message": "Internal Server Error"}, False),
     ],
 )
-def test_GitHubClient_make_request_success(
+def test_github_client_make_request_success(
     mock_github_response, mock_log_request, mock_session, status_code, content, is_ok
 ):
     mock_response = Mock()
@@ -227,7 +227,7 @@ def test_GitHubClient_make_request_success(
 
 
 @patch("gissues.extensions.github_client.client.GitHubIssues")
-def test_GitHubClient_issues_property(mock_github_issues):
+def test_github_client_issues_property(mock_github_issues):
     client = GitHubClient()
     assert client.issues == mock_github_issues.return_value
 
@@ -235,7 +235,7 @@ def test_GitHubClient_issues_property(mock_github_issues):
 
 
 @patch("gissues.extensions.github_client.client.GitHubRepositories")
-def test_GitHubClient_repositories_property(mock_github_repositories):
+def test_github_client_repositories_property(mock_github_repositories):
     client = GitHubClient()
     assert client.repositories == mock_github_repositories.return_value
 
@@ -243,14 +243,14 @@ def test_GitHubClient_repositories_property(mock_github_repositories):
 
 
 @patch("gissues.extensions.github_client.client.GitHubComments")
-def test_GitHubClient_comments_property(mock_github_comments):
+def test_github_client_comments_property(mock_github_comments):
     client = GitHubClient()
     assert client.comments == mock_github_comments.return_value
 
     mock_github_comments.assert_called_once_with(client)
 
 
-def test_GitHubIssues_list(mocked_github_client):
+def test_github_issues_list(mocked_github_client):
     client = GitHubIssues(mocked_github_client)
     response = client.list("owner_name", "repo")
 
@@ -261,7 +261,7 @@ def test_GitHubIssues_list(mocked_github_client):
     mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner_name/repo/issues?state=all")
 
 
-def test_GitHubIssues_detail(mocked_github_client):
+def test_github_issues_detail(mocked_github_client):
     client = GitHubIssues(mocked_github_client)
     response = client.detail("owner_name", "repo", 1)
 
@@ -272,7 +272,7 @@ def test_GitHubIssues_detail(mocked_github_client):
     mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner_name/repo/issues/1")
 
 
-def test_GitHubRepositories_list(mocked_github_client):
+def test_github_repositories_list(mocked_github_client):
     client = GitHubRepositories(mocked_github_client)
     response = client.list("username")
 
@@ -283,7 +283,7 @@ def test_GitHubRepositories_list(mocked_github_client):
     mocked_github_client.make_request.assert_called_once_with("GET", "/users/username/repos")
 
 
-def test_GitHubRepositories_detail(mocked_github_client):
+def test_github_repositories_detail(mocked_github_client):
     client = GitHubRepositories(mocked_github_client)
     response = client.detail("owner_name", "repo")
 
@@ -294,7 +294,7 @@ def test_GitHubRepositories_detail(mocked_github_client):
     mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner_name/repo")
 
 
-def test_GitHubComments_list(mocked_github_client):
+def test_github_comments_list(mocked_github_client):
     client = GitHubComments(mocked_github_client)
     response = client.list("owner_name", "repo", 1)
 
@@ -305,7 +305,7 @@ def test_GitHubComments_list(mocked_github_client):
     mocked_github_client.make_request.assert_called_once_with("GET", "/repos/owner_name/repo/issues/1/comments")
 
 
-def test_GitHubComments_detail(mocked_github_client):
+def test_github_comments_detail(mocked_github_client):
     client = GitHubComments(mocked_github_client)
     response = client.detail("owner_name", "repo", 1)
 

@@ -10,11 +10,11 @@ from gissues.extensions.auth.models import UserRepositoryFollow
 from gissues.extensions.github.api.serializers import CommentsSerializer, IssueSerializer, RepositorySerializer
 from gissues.extensions.github.models import Comments, Issue, Repository
 from gissues.extensions.github.transformers import transform_comments, transform_issue, transform_repository
-from gissues.extensions.github_client.api.views import GitHubClientViewSet
+from gissues.extensions.github_client.api.views import BaseGitHubClientViewSet
 from gissues.extensions.github_client.client import github_client
 
 
-class RepositoryViewSet(GitHubClientViewSet):
+class RepositoryViewSet(BaseGitHubClientViewSet):
     serializer_class = RepositorySerializer
     queryset = Repository.objects.all()
     model = Repository
@@ -69,7 +69,7 @@ class RepositoryViewSet(GitHubClientViewSet):
         return Response(status=status.HTTP_200_OK)
 
 
-class IssueViewSet(GitHubClientViewSet):
+class IssueViewSet(BaseGitHubClientViewSet):
     serializer_class = IssueSerializer
     queryset = Issue.objects.all()
     model = Issue
@@ -99,7 +99,7 @@ class IssueViewSet(GitHubClientViewSet):
         )
 
 
-class CommentsViewSet(GitHubClientViewSet):
+class CommentsViewSet(BaseGitHubClientViewSet):
     serializer_class = CommentsSerializer
     queryset = Comments.objects.all()
     model = Comments
